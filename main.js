@@ -1,6 +1,42 @@
 launchApp("小红书");
-sleep(getRandomInt(5000, 8000));
-var count = 3;
+sleep(getRandomInt(2000, 5000));
+
+
+console
+    .setSize(0.8, 0.3)
+    .setPosition(0.02, 0.001)
+    .setTitle('日志')
+    .setTitleTextSize(10)
+    .setContentTextSize(10)
+    .setBackgroundColor('#80000000')
+    .setTitleBackgroundAlpha(0.8)
+    .setContentBackgroundAlpha(0.5)
+    .setExitOnClose(6e3)
+    .setTouchable(false)
+    .show();
+
+var count = 300;
+
+
+
+// let noteText = className("android.widget.TextView").find();
+// console.log(`笔记内容：}`, noteText);
+// let length = noteText.length;
+
+// let noteObj = {
+//     author: noteText[0].text(),
+//     title: noteText[2].text() == '试试文字发笔记' ? noteText[4].text() : noteText[2].text(),
+//     content: noteText[3].text() == '去发布' ? noteText[5].text() : noteText[3].text(),
+//     commentCount: noteText[length - 1].text(),
+//     likeCount: noteText[length - 3].text(),
+//     collectCount: noteText[length - 2].text(),
+//     commentCenter: noteText[length - 1].center(),
+//     likeCenter: noteText[length - 3].center(),
+//     collectCenter: noteText[length - 2].center()
+// }
+// console.log(`笔记内容：${JSON.stringify(noteObj)}`);
+
+
 
 main();
 
@@ -11,7 +47,7 @@ function main() {
                 break;
             }
             // 下滑操作
-            swipe(device.width / getRandomFloat(1,4), device.height * getRandomFloat(0.7,0.9), device.width / getRandomFloat(1,4), device.height * getRandomFloat(0.1,0.3), getRandomInt(500, 1000));
+            swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), getRandomInt(500, 1000));
             sleep(getRandomInt(2000, 5000));
 
             let notes = className("android.widget.FrameLayout")
@@ -26,19 +62,15 @@ function main() {
             });
 
             textNote = textNote.filter(function (note) {
-                return note !== null;});
+                return note !== null;
+            });
 
             console.log(`找到笔记 ${textNote.length}条`);
             if (textNote.length > 0) {
-                sleep(getRandomInt(2000, 5000));
-                enterNote(textNote[0]);
-                sleep(getRandomInt(2000, 5000));
+                enterNote(textNote[getRandomInt(0, textNote.length - 1)]);
 
-                let goBack = getGoBackByNote();
-                if (goBack) {
-                    press(goBack.center().x, goBack.center().y, 100)
-                }
-                swipe(device.width / getRandomFloat(1,4), device.height * getRandomFloat(0.7,0.9), device.width / getRandomFloat(1,4), device.height * getRandomFloat(0.1,0.3), getRandomInt(500, 1000));
+                getGoBackByNote();
+                swipeDown();
             }
         }
     } catch (e) {
@@ -49,12 +81,37 @@ function main() {
 
 
 /**
- * 进入笔记
+ * 进入图文笔记
  */
 function enterNote(textNote) {
     console.log(`点击笔记 ${JSON.stringify(textNote)} x:${textNote.center.x} y:${textNote.center.y}`);
     press(textNote.center.x, textNote.center.y, getRandomInt(100, 300))
+    sleep(getRandomInt(2000, 3000));
+
+    let noteText = className("android.widget.TextView").find();
+    let length = noteText.length;
+
+    let noteObj = {
+        author: noteText[0].text(),
+        title: noteText[2].text() == '试试文字发笔记' ? noteText[4].text() : noteText[2].text(),
+        content: noteText[3].text() == '去发布' ? noteText[5].text() : noteText[3].text(),
+        commentCount: noteText[length - 1].text(),
+        likeCount: noteText[length - 3].text(),
+        collectCount: noteText[length - 2].text(),
+        commentCenter: noteText[length - 1].center(),
+        likeCenter: noteText[length - 3].center(),
+        collectCenter: noteText[length - 2].center()
+    }
+
+    console.log(`笔记内容：${JSON.stringify(noteObj)}`);
+
+    swipeLeft();
+    swipeLeft();
+    swipeRight();
+    swipeDown();
+    swipeDown();
     sleep(getRandomInt(2000, 5000));
+
 }
 
 
@@ -79,7 +136,7 @@ function getRandomInt(min, max) {
     min = Math.ceil(min); // 将 min 向上取整
     max = Math.floor(max); // 将 max 向下取整
     let random = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log(`生成随机数：${random}`);
+    console.log(`等待：${random}`);
     return random;
 }
 
@@ -93,17 +150,17 @@ function getRandomInt(min, max) {
 function getRandomFloat(min, max) {
     // 检查输入参数是否有效
     if (typeof min !== 'number' || typeof max !== 'number') {
-      return NaN; // 返回 NaN 表示无效输入
+        return NaN; // 返回 NaN 表示无效输入
     }
-  
+
     // 确保 min 小于等于 max
     if (min > max) {
-      [min, max] = [max, min]; // 交换 min 和 max 的值
+        [min, max] = [max, min]; // 交换 min 和 max 的值
     }
-  
+
     // 生成随机小数
     return Math.random() * (max - min) + min;
-  }
+}
 
 
 
@@ -138,7 +195,72 @@ function getGoBackByNote() {
     });
     if (filteredNotes.length > 0) {
         console.log(`找到返回按钮 x:${filteredNotes[0].center().x} y:${filteredNotes[0].center().y}`);
-        return filteredNotes[0];
+        if (filteredNotes[0]) {
+            console.log(`点击返回按钮`);
+            press(filteredNotes[0].center().x, filteredNotes[0].center().y, 100)
+        }
     }
     return null;
 }
+
+
+function swipeLeft() {
+    sleep(getRandomInt(2000, 5000));
+    // 获取屏幕宽度和高度
+    let screenWidth = device.width;
+    let screenHeight = device.height;
+
+    // 计算滑动起始和结束坐标
+    let startX = screenWidth * 0.9; // 屏幕右侧偏左的位置
+    let startY = screenHeight * 0.3; // 屏幕中间偏上的位置
+    let endX = screenWidth * 0.1; // 屏幕左侧偏右的位置
+    let endY = startY; // 保持 Y 坐标不变，实现水平滑动
+
+    // 执行滑动操作
+    swipe(startX, startY, endX, endY, getRandomInt(800, 1000)); // 500 是滑动持续时间，单位为毫秒
+    sleep(getRandomInt(2000, 5000));
+}
+
+function swipeRight() {
+    sleep(getRandomInt(2000, 5000));
+    // 获取屏幕宽度和高度
+    let screenWidth = device.width;
+    let screenHeight = device.height;
+
+    // 计算滑动起始和结束坐标
+    let startX = screenWidth * 0.1; // 屏幕左侧偏右的位置
+    let startY = screenHeight * 0.3; // 屏幕中间偏上的位置
+    let endX = screenWidth * 0.9; // 屏幕右侧偏左的位置
+    let endY = startY; // 保持 Y 坐标不变，实现水平滑动
+
+    // 执行滑动操作
+    swipe(startX, startY, endX, endY, getRandomInt(800, 1000)); // 500 是滑动持续时间，单位为毫秒
+    sleep(getRandomInt(2000, 5000));
+}
+
+function swipeDown() {
+    sleep(getRandomInt(2000, 5000));
+    swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), getRandomInt(500, 1000));
+    sleep(getRandomInt(2000, 5000));
+}
+
+
+/**
+ *  读取文本中的数字
+ * @param {文本} text 
+ * @returns 
+ */
+function extractNumber(text) {
+    // 使用正则表达式匹配所有数字
+    const matches = text.match(/\d+/g);
+
+    // 如果找到匹配项，则返回第一个匹配项（假设只有一个数字）
+    if (matches && matches.length > 0) {
+        return parseInt(matches[0]);
+    }
+
+    // 如果没有找到匹配项，则返回 null 或 NaN，具体取决于您的需求
+    return null; // 或者 NaN
+}
+
+
