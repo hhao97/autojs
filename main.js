@@ -15,7 +15,10 @@ console
     .setTouchable(false)
     .show();
 
-var count = 300;
+var count = 30;
+
+
+
 
 
 main();
@@ -93,6 +96,24 @@ function enterNote(textNote) {
     for (let i = 0; i < 10; i++) {
         randomExcute(50, swipeDown);
     }
+
+    // ai 评论
+    let aiResult = callDeepSeek();
+
+    let notes = className("android.widget.TextView")
+        .find();
+    let filteredNotes = notes.filter(function (note) {
+        return note.desc() && note.desc().includes("评论框");
+    });
+
+    console.log(`filnote`, filteredNotes[0].center().x, filteredNotes[0].center().y)
+    press(filteredNotes[0].center().x, filteredNotes[0].center().y)
+    sleep(getRandomInt(2000, 3000));
+
+    let editText = className("android.widget.EditText").find();
+    press(editText[0].center().x, editText[0].center().y)
+    editText.setText(aiResult)
+
 }
 
 function randomExcute(rate, func) {
@@ -268,3 +289,68 @@ function hitProbability(probability) {
 
     return flag;
 }
+
+function callDeepSeek(content) {
+
+    var url = "https://api.deepseek.com/chat/completions";
+    // 定义请求头
+    var headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer sk-3c15ee56adce455daa553784b251fe4a",
+    };
+    // 定义请求选项
+    var options = {
+        headers: headers,
+        timeout: 10000 // 可选：设置超时时间(毫秒)
+    };
+
+    r = http.postJson(url, {
+        "model": "deepseek-chat",
+        "messages": [
+            {
+                "role": "system",
+                "content": "你是一个小红书用户，你了解小红书的社区文化，你的年龄是18~30岁之间的女生，我将会给你其他用户的小红书笔记，你要通过我给你的文案信息，生成一段评论。评论尽量再50字以内。最重要好的一点你不能让别人看的出你是ai评论，所以你的评论应该要接地气一点，可以有情绪输出。"
+            },
+            {
+                "role": "user",
+                "content":  `${content}`
+            }
+        ],
+        "stream": false
+    }, options);
+
+    console.log(`ai结果：`, r.body.string())
+
+    var result = getContentFromJson(r.body.string());
+
+    return result;
+}
+
+/**
+ * 
+ * @param {deepseek 返回结果} jsonString 
+ * @returns 
+ */
+function getContentFromJson(jsonString) {
+    try {
+        // 将 JSON 字符串解析为 JavaScript 对象
+        const jsonObject = JSON.parse(jsonString);
+
+        // 访问 choices 数组中的第一个对象的 message 对象的 content 属性
+        if (
+            jsonObject &&
+            jsonObject.choices &&
+            jsonObject.choices.length > 0 &&
+            jsonObject.choices[0].message &&
+            jsonObject.choices[0].message.content
+        ) {
+            return jsonObject.choices[0].message.content;
+        } else {
+            return null; // 如果找不到 content 字段，则返回 null
+        }
+    } catch (error) {
+        console.error("解析 JSON 字符串时出错:", error);
+        return null; // 如果解析 JSON 字符串时出错，则返回 null
+    }
+}
+
