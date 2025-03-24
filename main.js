@@ -105,13 +105,20 @@ function enterNote(textNote) {
 
     console.log(`笔记内容：${JSON.stringify(noteObj)}`);
 
-    swipeLeft();
-    swipeLeft();
-    swipeRight();
-    swipeDown();
-    swipeDown();
-    sleep(getRandomInt(2000, 5000));
+    for (let i = 0; i < 3; i++) {
+        randomExcute(50, swipeLeft);
+        randomExcute(50, swipeRight);
+    }
 
+    for (let i = 0; i < 10; i++) {
+        randomExcute(50, swipeDown);
+    }
+}
+
+function randomExcute(rate, func) {
+    if (hitProbability(rate)) {
+        func();
+    }
 }
 
 
@@ -264,3 +271,20 @@ function extractNumber(text) {
 }
 
 
+
+function hitProbability(probability) {
+
+    // 处理边界情况
+    if (probability === 0) return false;
+    if (probability === 100) return true;
+
+    // 生成 0 到 100 之间的随机数（包含 0，不包含 100）
+    const randomValue = Math.random() * 100;
+
+    let flag = false;
+    // 检查是否命中
+    flag = randomValue < probability
+    console.log(`命中概率：${probability} 结果：${flag}`);
+
+    return flag;
+}
