@@ -18,26 +18,6 @@ console
 var count = 300;
 
 
-
-// let noteText = className("android.widget.TextView").find();
-// console.log(`笔记内容：}`, noteText);
-// let length = noteText.length;
-
-// let noteObj = {
-//     author: noteText[0].text(),
-//     title: noteText[2].text() == '试试文字发笔记' ? noteText[4].text() : noteText[2].text(),
-//     content: noteText[3].text() == '去发布' ? noteText[5].text() : noteText[3].text(),
-//     commentCount: noteText[length - 1].text(),
-//     likeCount: noteText[length - 3].text(),
-//     collectCount: noteText[length - 2].text(),
-//     commentCenter: noteText[length - 1].center(),
-//     likeCenter: noteText[length - 3].center(),
-//     collectCenter: noteText[length - 2].center()
-// }
-// console.log(`笔记内容：${JSON.stringify(noteObj)}`);
-
-
-
 main();
 
 function main() {
