@@ -1,5 +1,5 @@
 launchApp("小红书");
-sleep(getRandomInt(2000, 5000));
+sleep(getRandomInt(5000, 8000));
 
 
 console
@@ -17,12 +17,6 @@ console
 
 var count = 30;
 
-
-
-
-
-main();
-
 function main() {
     try {
         while (count--) {
@@ -30,25 +24,21 @@ function main() {
                 break;
             }
             // 下滑操作
-            swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), getRandomInt(500, 1000));
-            sleep(getRandomInt(2000, 5000));
+            swipeDown();
+            let textNote = undefined;
 
-            let notes = className("android.widget.FrameLayout")
-                .find();
+            if (isHomePage()) {
+                textNote = findRecommandTextNote();
+            } else if (isSearchResultPage()) {
+                textNote = findSearchTextNote();
+            } else {
+                console.log("暂不支持的页面");
+                break;
+            }
+            
+            console.log("textNote--->", textNote);
 
-            let filteredNotes = notes.filter(function (note) {
-                return note.desc() && note.desc().includes("笔记");
-            });
-
-            let textNote = filteredNotes.map(function (note) {
-                return parseNoteDesc(note.desc(), note.center());
-            });
-
-            textNote = textNote.filter(function (note) {
-                return note !== null;
-            });
-
-            console.log(`找到笔记 ${textNote.length}条`);
+            console.log(`找到笔记 ${textNote.length}条`,);
             if (textNote.length > 0) {
                 enterNote(textNote[getRandomInt(0, textNote.length - 1)]);
 
@@ -57,7 +47,7 @@ function main() {
             }
         }
     } catch (e) {
-        console.log("脚本出错：" + e);
+        console.log("脚本出错：", e);
     }
 }
 
@@ -70,6 +60,31 @@ function enterNote(textNote) {
     console.log(`点击笔记 ${JSON.stringify(textNote)} x:${textNote.center.x} y:${textNote.center.y}`);
     press(textNote.center.x, textNote.center.y, getRandomInt(100, 300))
     sleep(getRandomInt(2000, 3000));
+
+    if (isVideoNote()) {
+        console.log(`视频笔记，跳过`);
+        return
+    }
+
+    let noteObj = getTextNoteContent();
+
+    for (let i = 0; i < 2; i++) {
+        randomExcute(50, swipeLeft);
+        randomExcute(50, swipeRight);
+    }
+
+    for (let i = 0; i < 5; i++) {
+        randomExcute(50, swipeDown);
+    }
+
+    // ai 评论
+    randomExcute(50, doComment((noteObj)));
+
+}
+/**
+ * 获取图文的正文和标题基础信息
+ */
+function getTextNoteContent() {
 
     let noteText = className("android.widget.TextView").find();
     let length = noteText.length;
@@ -86,19 +101,18 @@ function enterNote(textNote) {
         collectCenter: noteText[length - 2].center()
     }
 
-    console.log(`笔记内容：${JSON.stringify(noteObj)}`);
+    console.log(`获取笔记内容：${JSON.stringify(noteObj)}`);
+    return noteObj;
+}
 
-    for (let i = 0; i < 3; i++) {
-        randomExcute(50, swipeLeft);
-        randomExcute(50, swipeRight);
+function randomExcute(rate, func) {
+    if (hitProbability(rate)) {
+        func();
     }
+}
 
-    for (let i = 0; i < 10; i++) {
-        randomExcute(50, swipeDown);
-    }
-
-    // ai 评论
-    let aiResult = callDeepSeek();
+function doComment(noteObj) {
+    let aiResult = callDeepSeek(`笔记标题：${noteObj.title} 笔记内容：${noteObj.content}`);
 
     let notes = className("android.widget.TextView")
         .find();
@@ -114,12 +128,12 @@ function enterNote(textNote) {
     press(editText[0].center().x, editText[0].center().y)
     editText.setText(aiResult)
 
-}
+    sleep(getRandomInt(2000, 3000));
 
-function randomExcute(rate, func) {
-    if (hitProbability(rate)) {
-        func();
-    }
+    let postView = className("android.widget.ImageView").find();
+    console.log(`找到笔记`, device.width - postView[0].center().x, postView[0].center().y);
+    press(device.width - postView[0].center().x, postView[0].center().y)
+    sleep(getRandomInt(2000, 3000));
 }
 
 
@@ -144,7 +158,7 @@ function getRandomInt(min, max) {
     min = Math.ceil(min); // 将 min 向上取整
     max = Math.floor(max); // 将 max 向下取整
     let random = Math.floor(Math.random() * (max - min + 1)) + min;
-    console.log(`等待：${random}`);
+    console.log(`随机等待：${random / 1000} 秒`);
     return random;
 }
 
@@ -191,6 +205,8 @@ function parseNoteDesc(desc, center) {
     }
 }
 
+
+
 /**
  * 获取笔记返回按钮 
  * @returns 笔记返回按钮
@@ -198,9 +214,16 @@ function parseNoteDesc(desc, center) {
 function getGoBackByNote() {
     let goBack = className('android.widget.Button').find();
     let filteredNotes = goBack.filter(function (note) {
-        // 检查 note 是否有 desc 属性，并且 desc 包含 "笔记"
-        return note.desc() && note.desc().includes("返回") && note.center().x == 45.0;
+        return note.desc() && note.desc().includes("返回") ;
     });
+
+    if(filteredNotes.length == 0){
+        goBack = className('android.widget.ImageView').find();
+        filteredNotes = goBack.filter(function (note) {
+            return note.desc() && note.desc().includes("返回") ;
+        });
+    }  
+
     if (filteredNotes.length > 0) {
         console.log(`找到返回按钮 x:${filteredNotes[0].center().x} y:${filteredNotes[0].center().y}`);
         if (filteredNotes[0]) {
@@ -285,11 +308,14 @@ function hitProbability(probability) {
     let flag = false;
     // 检查是否命中
     flag = randomValue < probability
-    console.log(`命中概率：${probability} 结果：${flag}`);
+    console.log(`随机执行动作：概率：${probability} 结果：${flag}`);
 
     return flag;
 }
 
+/**
+ * 调用 ai 回复
+ */
 function callDeepSeek(content) {
 
     var url = "https://api.deepseek.com/chat/completions";
@@ -301,7 +327,7 @@ function callDeepSeek(content) {
     // 定义请求选项
     var options = {
         headers: headers,
-        timeout: 10000 // 可选：设置超时时间(毫秒)
+        timeout: 20000 // 可选：设置超时时间(毫秒)
     };
 
     r = http.postJson(url, {
@@ -309,11 +335,54 @@ function callDeepSeek(content) {
         "messages": [
             {
                 "role": "system",
-                "content": "你是一个小红书用户，你了解小红书的社区文化，你的年龄是18~30岁之间的女生，我将会给你其他用户的小红书笔记，你要通过我给你的文案信息，生成一段评论。评论尽量再50字以内。最重要好的一点你不能让别人看的出你是ai评论，所以你的评论应该要接地气一点，可以有情绪输出。"
+                "content": `要求：
+
+≤30字，口语化+轻微情绪
+
+开放式问句结尾，诱导真实回复
+
+禁用产品/品牌名，仅描述体验
+
+人类特征：手误/语气词/小吐槽
+
+【万能模板】
+体验+疑问
+"居然真的有用！你们试了吗？"
+"这样穿显瘦5斤！但容易皱咋解决？"
+
+对比+求助
+"比上次的方法快，就是手酸…有诀窍吗？"
+"冬天用比夏天好，你们呢？"
+
+小吐槽+互动
+"差点翻车…有人和我一样吗？"
+"效果还行，但过程太累了😅 值不值？"
+
+【分场景示例】
+💄 美妆
+"睫毛翘了但塌得快！求定型方法？"
+"这个画法适合肿眼泡吗？"
+
+👗 穿搭
+"小个子穿长款显矮吗？纠结！"
+"同款搭配，你们配什么鞋？"
+
+🍳 生活
+"煮10次破8次…哪步错了？"
+"这方法省时但费手，还继续吗？"
+
+【人类感技巧】
+✓ 手误："显白（啊是显气色）！"
+✓ 突然转折："…就是味道劝退"
+✓ 语气词："真的假的啊？"
+
+避雷：
+❌ "买它！" → ✅ "值得试吗？"
+❌ "XX品牌最好" → ✅ "有没有更…的？"`
             },
             {
                 "role": "user",
-                "content":  `${content}`
+                "content": `${content}`
             }
         ],
         "stream": false
@@ -354,3 +423,112 @@ function getContentFromJson(jsonString) {
     }
 }
 
+
+/**
+ * 
+ * @returns 查询后的笔记筛选
+ */
+function findSearchTextNote() {
+    let notes = className("android.widget.TextView")
+        .find();
+
+    let filteredNotes = notes.filter(function (note) {
+        return note.text() && note.text().length >= 8;
+    });
+    filteredNotes = filteredNotes.filter(function (note) {
+        return note.center().x < device.width * 0.8 && note.center().y < device.height * 0.8;
+    });
+
+    let textNote = filteredNotes.map(function (note) {
+        return {
+            noteTitle: note.text(),
+            center: {
+                x: note.center().x,
+                y: note.center().y
+            }
+        };
+    });
+
+    // console.log(`笔记数量：`, textNote);
+    return textNote;
+}
+
+/**
+ * 
+ * @returns 查询首页推荐栏目的图文笔记
+ */
+function findRecommandTextNote() {
+    let notes = className("android.widget.FrameLayout")
+        .find();
+
+    let filteredNotes = notes.filter(function (note) {
+        return note.desc() && note.desc().includes("笔记");
+    });
+
+    let textNote = filteredNotes.map(function (note) {
+        return parseNoteDesc(note.desc(), note.center());
+    });
+
+    textNote = textNote.filter(function (note) {
+        return note !== null;
+    });
+    return textNote;
+}
+
+/**
+ * 
+ * @returns 是否是视频笔记
+ */
+function isVideoNote() {
+    let notes = className("android.widget.ImageView")
+        .find();
+
+    let filteredNotes = notes.filter(function (note) {
+        return note.desc() && note.desc().includes("搜索");
+    });
+
+    let result = filteredNotes != undefined && filteredNotes[0] != undefined && filteredNotes != null && filteredNotes[0] != null;
+    if (result) {
+        console.log(`视频笔记`);
+    }
+    return result
+}
+
+/**
+ * 
+ * @returns  是否是首页
+ */
+function isHomePage() {
+    const requiredTexts = ["发现", "关注"];
+    const notes = className("android.widget.TextView").find();
+    const result = requiredTexts.every(text =>
+        notes.some(note => note.text() === text)
+    );
+    if (result) {
+        console.log(`首页`);
+    }
+    return result;
+}
+/**
+ * 
+ * @returns 是否是搜索结果页
+ */
+function isSearchResultPage() {
+    const requiredTexts = ["搜索", "全部", "用户", "话题"];
+    const notes = className("android.widget.TextView").find();
+
+    const result = requiredTexts.every(text =>
+        notes.some(note => note.text() === text)
+    );
+    if (result) {
+        console.log(`搜索结果页`);
+    }
+    return result;
+}
+
+// console.log(isHomePage());
+// console.log(isSearchResultPage());
+
+// getTextNoteContent();
+main();
+// console.log(isVideoNote())
