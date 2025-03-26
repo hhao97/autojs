@@ -16,18 +16,25 @@ console
     .show();
 
 var count = 30;
-
-var failCount = 5;
+var failCount = 0;
+var serachKey = '省钱';
 
 function main() {
     try {
         while (count--) {
-            if (count <= -3 || failCount <= 0) {
+            if (count <= -3 || failCount >= 10) {
                 break;
             }
+
+            console.log(`剩余次数：${count} 失败次数：${failCount}`);
+
             // 下滑操作
             swipeDown();
             let textNote = undefined;
+
+            if(serachKey!= ''){
+                doSearch(serachKey);
+            }
 
             if (isHomePage()) {
                 textNote = findRecommandTextNote();
@@ -36,11 +43,9 @@ function main() {
             } else {
                 console.log("暂不支持的页面，尝试返回");
                 getGoBackByNote();
-                failCount--;
+                failCount++;
                 continue
             }
-
-            // console.log("textNote--->", textNote);
 
             console.log(`找到笔记 ${textNote.length}条`,);
             if (textNote.length > 0) {
@@ -61,38 +66,47 @@ function main() {
  * 进入图文笔记
  */
 function enterNote(textNote) {
-    sleep(getRandomInt(2000, 3000));
-    console.log(`点击笔记 ${JSON.stringify(textNote)} x:${textNote.center.x} y:${textNote.center.y}`);
-    press(textNote.center.x, textNote.center.y, getRandomInt(100, 300))
-    sleep(getRandomInt(2000, 3000));
+    try {
+        sleep(getRandomInt(2000, 3000));
+        console.log(`列表页点击笔记 ${JSON.stringify(textNote)}`);
+        press(textNote.center.x, textNote.center.y, getRandomInt(100, 300))
+        sleep(getRandomInt(2000, 3000));
 
-    if (isVideoNote()) {
-        console.log(`视频笔记，跳过`);
-        return
+        if (isVideoNote()) {
+            console.log(`视频笔记，跳过`);
+            return
+        }
+
+        if (isTextNotePage) {
+            let noteObj = getTextNoteContent();
+
+            for (let i = 0; i < 2; i++) {
+                randomExcute(50, swipeLeft, '左滑');
+                randomExcute(50, swipeRight, '右滑');
+            }
+
+            for (let i = 0; i < 10; i++) {
+                randomExcute(50, swipeDown, '下滑');
+            }
+
+            // ai 评论
+            randomExcute(50, doComment, 'ai 评论', noteObj);
+
+            // 随机笔记点赞
+            randomExcute(60, doLikeByNote, '笔记点赞', noteObj);
+
+            // 随机用户评论点赞
+            randomExcute(50, doLikeByUser, '点赞');
+
+        } else {
+            console.log(`不是图文笔记详情页,点击返回`);
+            getGoBackByNote();
+        }
+
+
+    } catch (e) {
+        console.log(`进入笔记出错`, e);
     }
-
-    if (isTextNotePage) {
-        let noteObj = getTextNoteContent();
-
-        for (let i = 0; i < 2; i++) {
-            randomExcute(50, swipeLeft, '左滑');
-            randomExcute(50, swipeRight, '右滑');
-        }
-
-        for (let i = 0; i < 10; i++) {
-            randomExcute(50, swipeDown, '下滑');
-        }
-
-        // ai 评论
-        if (hitProbability(30, 'ai 评论')) {
-            doComment(noteObj);
-        }
-    } else {
-        console.log(`不是图文笔记详情页,点击返回`);
-        getGoBackByNote();
-    }
-
-
 }
 
 /**
@@ -124,9 +138,9 @@ function getTextNoteContent() {
     return noteObj;
 }
 
-function randomExcute(rate, func, action) {
+function randomExcute(rate, func, action, param) {
     if (hitProbability(rate, action)) {
-        func();
+        func(param);
     }
 }
 
@@ -182,7 +196,7 @@ function getRandomInt(min, max) {
     // 生成随机整数
     const randomNumber = Math.floor(Math.random() * (roundedMax - roundedMin + 1)) + roundedMin;
     const result = Math.max(1, randomNumber);
-    console.log(`生成随机数：${result}`);
+    console.log(`随机数：${result} `);
     // 确保随机数是正数
     return result;
 }
@@ -255,8 +269,11 @@ function getGoBackByNote() {
         if (filteredNotes[0]) {
             console.log(`点击返回按钮`);
             press(filteredNotes[0].center().x, filteredNotes[0].center().y, 100)
+            return
         }
     }
+
+    console.log(`按下返回按钮`, back())
     return null;
 }
 
@@ -364,7 +381,7 @@ function callDeepSeek(content) {
         "messages": [
             {
                 "role": "system",
-                "content": `你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点。你的人物设定： 28 岁，女 。`
+                "content": `你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。`
             },
             {
                 "role": "user",
@@ -493,6 +510,7 @@ function isHomePage() {
     if (result) {
         console.log(`首页`);
     }
+    
     return result;
 }
 
@@ -518,7 +536,7 @@ function isSearchResultPage() {
  */
 function isTextNotePage() {
     const requiredTexts = ["分享"];
-    const notes = className("android.widget.Button").find();
+    const notes = className("android.widget.TextView").find();
     const result = requiredTexts.every(text =>
         notes.some(note => note.desc() === text)
     );
@@ -527,11 +545,149 @@ function isTextNotePage() {
 }
 
 
+/**
+ * 是否是消息列表页
+ */
+function isMessagePage() {
+    const requiredTexts = ["消息", '发现群聊'];
+    const notes = className("android.widget.TextView").find();
+    const result = requiredTexts.every(text =>
+        notes.some(note => note.text() === text)
+    );
+    console.log(`是否是消息列表页`, result)
+    return result;
+}
+
+
+/**
+ * 给笔记点赞
+ */
+function doLikeByNote(noteObj) {
+    if (isTextNotePage) {
+        if (!noteObj) {
+            noteObj = getTextNoteContent();
+        }
+        sleep(getRandomInt(2000, 3000));
+        press(noteObj.likeCenter.x, noteObj.likeCenter.y, 100)
+        console.log(`点赞笔记`, noteObj.likeCenter.x, noteObj.likeCenter.y);
+    }
+}
+
+/**
+ * 给用户点赞
+ */
+function doLikeByUser() {
+    if (isTextNotePage) {
+        sleep(getRandomInt(2000, 3000));
+        const likeView = className("android.widget.ImageView").find();
+
+        filteredNotes = likeView.filter(function (note) {
+            return note.center().y < device.height * 0.6;
+        });
+        filteredNotes = findMostFrequentX(filteredNotes)
+        if (filteredNotes.length > 0) {
+            const randomIdx = getRandomInt(0, filteredNotes.length - 1);
+            console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
+            sleep(getRandomInt(2000, 3000));
+            press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y, 100)
+        }
+    }
+}
+
+
+/**
+ * 找到评论区的点赞按钮
+ */
+function findMostFrequentX(filteredNotes) {
+    const xCounts = {};
+    const xObjects = {};
+    let maxCount = 0;
+    let mostFrequentX = null;
+
+    // 统计 x 值的计数，并存储每个 x 值对应的对象
+    filteredNotes.forEach(obj => {
+        const x = obj.center().x;
+        xCounts[x] = (xCounts[x] || 0) + 1;
+        xObjects[x] = obj; // 存储每个 x 值对应的对象
+        if (xCounts[x] > maxCount) {
+            maxCount = xCounts[x];
+            mostFrequentX = x;
+        }
+    });
+
+    // 创建一个数组，仅包含出现次数最多的对象
+    const mostFrequentObjects = [];
+    if (mostFrequentX !== null) {
+        // 检查是否有任何 x 值出现超过一次
+        if (maxCount > 1) {
+            // 遍历 filteredNotes ,将出现次数最多的x值存储到数组
+            filteredNotes.forEach(obj => {
+                const x = obj.center().x;
+                if (x === mostFrequentX) {
+                    mostFrequentObjects.push(obj);
+                }
+            })
+        }
+    }
+
+    // // 输出结果
+    // console.log('xCounts:', xCounts);
+    // console.log('mostFrequentX:', mostFrequentX);
+    // console.log('mostFrequentObjects:', mostFrequentObjects);
+
+    //返回结果
+    return mostFrequentObjects;
+}
+
+/**
+ * 发起搜索
+ * @param {*} serachKey 
+ */
+function doSearch(serachKey) {
+    if (isHomePage) {
+        const btn = className("android.widget.Button").find();
+        const searchBtn = btn.filter(function (note) {
+            return note.desc() && note.desc() == "搜索";
+        });
+        press(searchBtn[0].center().x, searchBtn[0].center().y, 100)
+        console.log(`点击搜索按钮`);
+        sleep(getRandomInt(3000, 5000));
+
+        const searchInput = className("android.widget.EditText").find();
+        searchInput = searchInput.filter(function (note) {
+            return note.text() && note.text().includes("搜索");
+        });
+        searchInput[0].setText(serachKey);
+        console.log(`设置搜索内容：${serachKey}`);
+        sleep(getRandomInt(3000, 5000));
+
+        const doSearchBtn = className("android.widget.Button").find();
+
+        const doSearchBtnT = doSearchBtn.filter(function (note) {
+            return note.text() && note.text() == "搜索";
+        });
+
+        press(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y, 300);
+        console.log(`点击搜索按钮`);
+
+        sleep(getRandomInt(3000, 5000));
+    }
+}
+
+main();
+
+
 // console.log(isHomePage());
 // console.log(isSearchResultPage());
 
 // getTextNoteContent();
-main();
 // console.log(isVideoNote())
 // getGoBackByNote()
 // console.log(isTextNotePage());
+// doLikeByUser()
+// getGoBackByNote();
+
+// isMessagePage();
+// doLikeByNote();
+
+// doSearch("购物返利");
