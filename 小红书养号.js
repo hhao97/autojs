@@ -1,23 +1,22 @@
-launchApp("小红书");
-sleep(getRandomInt(5000, 8000));
-
-
-console
-    .setSize(0.8, 0.3)
-    .setPosition(0.02, 0.001)
-    .setTitle('日志')
-    .setTitleTextSize(10)
-    .setContentTextSize(10)
-    .setBackgroundColor('#80000000')
-    .setTitleBackgroundAlpha(0.8)
-    .setContentBackgroundAlpha(0.5)
-    .setExitOnClose(6e3)
-    .setTouchable(false)
-    .show();
-
 var count = 30;
 var failCount = 0;
 var serachKey = '省钱';
+
+var rednote = {}
+
+
+
+rednote.run = function (config) {
+    auto.service.ensureEnabled();
+    launchApp("小红书");
+    sleep(getRandomInt(5000, 8000));
+
+
+    main();
+}
+
+module.exports = rednote;
+
 
 function main() {
     try {
