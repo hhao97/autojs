@@ -4,16 +4,17 @@ var color = "#02685B";
 var config = {
     app: "小红书",
     // 用户评论点赞概率
-    userCommentLikeRate: '90',
+    userCommentLikeRate: '30',
     // 作品点赞概率
-    commentLikeRate: '90',
+    commentLikeRate: '20',
     // 评论概率
-    commentRate: '90',
+    commentRate: '10',
     // deepseek ai 评论 key
     dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
     prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。',
     // 脚本允许时长(分钟)
-    taskRuntime: '10'
+    taskRuntime: '10',
+    searchKey:'省钱|好物|母婴|生娃|育儿|怀孕'
 }
 
 
@@ -65,6 +66,7 @@ ui.layout(
                                         <text text="DeepSeek AI 评论 KEY" textSize="14sp" textColor='#333' />
                                         <input text='{{config.dsKey}}' singleLine="true" textSize='14sp' textColor='#333' />
                                     </vertical>
+
                                     <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
                                         <frame w="*" h="1" bg='#eee' gravity="center"  ></frame>
                                     </horizontal>
@@ -72,6 +74,15 @@ ui.layout(
                                     <vertical padding='10 0' gravity='center_vertical'>
                                         <text text="DeepSeek 提示词" textSize="14sp" textColor='#333' />
                                         <input text='{{config.prompt}}' singleLine="false" textSize='14sp' textColor='#333' />
+                                    </vertical>
+
+                                    <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
+                                        <frame w="*" h="1" bg='#eee' gravity="center"  ></frame>
+                                    </horizontal>
+
+                                    <vertical padding='10 0' gravity='center_vertical'>
+                                        <text text="搜索词(不填则刷首页推荐" textSize="14sp" textColor='#333' />
+                                        <input text='{{config.searchKey}}' singleLine="false" textSize='14sp' textColor='#333' />
                                     </vertical>
 
                                 </vertical>
@@ -90,7 +101,7 @@ ui.layout(
                                             <text layout_weight='1'></text>
                                             <text text="{{config.commentRate}}%" id='rateProgress'></text>
                                         </horizontal>
-                                        <seekbar id='rateSeekbar' max='100' progress='90' color='{{color}}' />
+                                        <seekbar id='rateSeekbar' max='100' progress='{{config.commentRate}}' color='{{color}}' />
                                     </vertical>
 
                                     <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
@@ -103,7 +114,7 @@ ui.layout(
                                             <text layout_weight='1'></text>
                                             <text text="{{config.commentLikeRate}}%" id='rateUserProgress'></text>
                                         </horizontal>
-                                        <seekbar id='rateUserSeekbar' max='100' progress='90' color='{{color}}' />
+                                        <seekbar id='rateUserSeekbar' max='100' progress='{{config.userCommentLikeRate}}' color='{{color}}' />
                                     </vertical>
 
                                     <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
@@ -116,7 +127,7 @@ ui.layout(
                                             <text layout_weight='1'></text>
                                             <text text="{{config.commentRate}}%" id='rateNoteProgress'></text>
                                         </horizontal>
-                                        <seekbar id='rateNoteSeekbar' max='100' progress='90' color='{{color}}' />
+                                        <seekbar id='rateNoteSeekbar' max='100' progress='{{config.commentRate}}' color='{{color}}' />
                                     </vertical>
                                 </vertical>
                             </card>
@@ -182,7 +193,7 @@ ui.startBtn.on("click", () => {
     var curTime = new Date();
 
     const exitTime = new Date(curTime.setMinutes(curTime.getMinutes() + config.taskRuntime));
-    toast('脚本结束时间' + exitTime)
+    toastLog('脚本结束时间: ' + formatDate(exitTime))
 
     console.log(`脚本执行时间 ${config.taskRuntime} 分`)
     ui.startBtnText.setText('执行中...')
@@ -190,7 +201,7 @@ ui.startBtn.on("click", () => {
     thread = threads.start(function () {
         //程序开始运行之前判断无障碍服务
         if (auto.service == null) {
-            toast("请先开启无障碍服务！");
+            toastLog("请先开启无障碍服务！");
             return;
         }
 
@@ -291,7 +302,7 @@ $ui.post(() => {
             console
                 .setSize(0.8, 0.3)
                 .setPosition(0.02, 0.001)
-                .setTitle('日志(+音量键可关闭脚本)')
+                .setTitle('日志(加音量键可开关日志浮窗)')
                 .setTitleTextSize(10)
                 .setContentTextSize(10)
                 .setBackgroundColor('#80000000')
@@ -314,15 +325,36 @@ $ui.post(() => {
 
 events.observeKey();
 events.setKeyInterceptionEnabled(true);
-events.on('volume_up', () => {
-    console.hide();
-    exit();
-    thread.interrupt()
+events.on('key_down', (keyCode, event) => {
+    if (keyCode == 24) {
+        if (!console.isShowing()) {
+            console
+                .setSize(0.8, 0.3)
+                .setPosition(0.02, 0.001)
+                .setTitle('日志(加音量键可开关日志浮窗)')
+                .setTitleTextSize(10)
+                .setContentTextSize(10)
+                .setBackgroundColor('#80000000')
+                .setTitleBackgroundAlpha(0.8)
+                .setContentBackgroundAlpha(0.5)
+                .setExitOnClose(6e3)
+                .setExitOnClose(true)
+                .setTouchable(false)
+                .show();
+        } else {
+            console.hide();
+        }
+    }
 });
+
 events.on('volume_down', () => {
+    console.hide();
+    if(thread && thread.isAlive()){
+        thread.interrupt()
+    }
     exit();
-    thread.interrupt()
 });
+
 ui.menu.setDataSource(menuItems.map(item => {
     let menuItem = {
         id: item.id,
@@ -343,3 +375,14 @@ ui.menu.on("item_click", item => {
             break;
     }
 })
+
+
+function formatDate(date) {
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+
+    const formattedDate = date.toLocaleDateString(undefined, dateOptions);
+    const formattedTime = date.toLocaleTimeString(undefined, timeOptions);
+
+    return `${formattedDate} ${formattedTime}`;
+}

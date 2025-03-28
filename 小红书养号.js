@@ -1,6 +1,6 @@
 var count = 30;
 var failCount = 0;
-var serachKey = '省钱';
+var errorCount = 3;
 
 var rednote = {}
 
@@ -8,10 +8,8 @@ var config = undefined;
 
 rednote.run = function (arg) {
     config = arg;
-    launchApp("小红书");
+    launchApp(config.app);
     sleep(getRandomInt(5000, 8000));
-
-
     main();
 }
 
@@ -29,10 +27,14 @@ function main() {
 
             // 下滑操作
             swipeDown();
+            swipeDown();
+            swipeDown();
+
             let textNote = undefined;
 
-            if (serachKey != '') {
-                doSearch(serachKey);
+            if (config.searchKey != '') {
+                const searchKeys = config.searchKey.split('|')
+                doSearch(searchKeys[getRandomInt(0, searchKeys.length - 1)]);
             }
 
             if (isHomePage()) {
@@ -55,7 +57,11 @@ function main() {
             }
         }
     } catch (e) {
-        console.log("脚本出错：", e);
+        console.log("脚本出错：", e, "当前运行错误次数", errorCount);
+        if (errorCount > 0) {
+            main();
+            errorCount--;
+        }
     }
 }
 
@@ -89,13 +95,13 @@ function enterNote(textNote) {
             }
 
             // ai 评论
-            randomExcute(50, doComment, 'ai 评论', noteObj);
+            randomExcute(config.commentRate, doComment, 'ai 评论', noteObj);
 
             // 随机笔记点赞
-            randomExcute(60, doLikeByNote, '笔记点赞', noteObj);
+            randomExcute(config.commentLikeRate, doLikeByNote, '笔记点赞', noteObj);
 
             // 随机用户评论点赞
-            randomExcute(50, doLikeByUser, '点赞');
+            randomExcute(config.userCommentLikeRate, doLikeByUser, '点赞');
 
         } else {
             console.log(`不是图文笔记详情页,点击返回`);
@@ -158,8 +164,11 @@ function doComment(noteObj) {
     let filteredNotes = notes.filter(function (note) {
         return note.desc() && note.desc().includes("评论框");
     });
+    if (!filteredNotes && filteredNotes.length <= 0) {
+        console.log("未找到评论框按钮")
+        return
+    }
 
-    console.log(`filnote`, filteredNotes[0].center().x, filteredNotes[0].center().y)
     press(filteredNotes[0].center().x, filteredNotes[0].center().y)
     sleep(getRandomInt(2000, 3000));
 
@@ -367,7 +376,7 @@ function callDeepSeek(content) {
     // 定义请求头
     var headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer sk-3c15ee56adce455daa553784b251fe4a",
+        "Authorization": `Bearer ${config.dsKey}`,
     };
     // 定义请求选项
     var options = {
@@ -380,7 +389,7 @@ function callDeepSeek(content) {
         "messages": [
             {
                 "role": "system",
-                "content": `你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。`
+                "content": `${config.prompt}`
             },
             {
                 "role": "user",
@@ -598,44 +607,47 @@ function doLikeByUser() {
  * 找到评论区的点赞按钮
  */
 function findMostFrequentX(filteredNotes) {
-    const xCounts = {};
-    const xObjects = {};
-    let maxCount = 0;
-    let mostFrequentX = null;
+    if (isTextNotePage) {
 
-    // 统计 x 值的计数，并存储每个 x 值对应的对象
-    filteredNotes.forEach(obj => {
-        const x = obj.center().x;
-        xCounts[x] = (xCounts[x] || 0) + 1;
-        xObjects[x] = obj; // 存储每个 x 值对应的对象
-        if (xCounts[x] > maxCount) {
-            maxCount = xCounts[x];
-            mostFrequentX = x;
-        }
-    });
+        const xCounts = {};
+        const xObjects = {};
+        let maxCount = 0;
+        let mostFrequentX = null;
 
-    // 创建一个数组，仅包含出现次数最多的对象
-    const mostFrequentObjects = [];
-    if (mostFrequentX !== null) {
-        // 检查是否有任何 x 值出现超过一次
-        if (maxCount > 1) {
-            // 遍历 filteredNotes ,将出现次数最多的x值存储到数组
-            filteredNotes.forEach(obj => {
-                const x = obj.center().x;
-                if (x === mostFrequentX) {
-                    mostFrequentObjects.push(obj);
-                }
-            })
+        // 统计 x 值的计数，并存储每个 x 值对应的对象
+        filteredNotes.forEach(obj => {
+            const x = obj.center().x;
+            xCounts[x] = (xCounts[x] || 0) + 1;
+            xObjects[x] = obj; // 存储每个 x 值对应的对象
+            if (xCounts[x] > maxCount) {
+                maxCount = xCounts[x];
+                mostFrequentX = x;
+            }
+        });
+
+        // 创建一个数组，仅包含出现次数最多的对象
+        const mostFrequentObjects = [];
+        if (mostFrequentX !== null) {
+            // 检查是否有任何 x 值出现超过一次
+            if (maxCount > 1) {
+                // 遍历 filteredNotes ,将出现次数最多的x值存储到数组
+                filteredNotes.forEach(obj => {
+                    const x = obj.center().x;
+                    if (x === mostFrequentX) {
+                        mostFrequentObjects.push(obj);
+                    }
+                })
+            }
         }
+
+        // // 输出结果
+        // console.log('xCounts:', xCounts);
+        // console.log('mostFrequentX:', mostFrequentX);
+        // console.log('mostFrequentObjects:', mostFrequentObjects);
+
+        //返回结果
+        return mostFrequentObjects;
     }
-
-    // // 输出结果
-    // console.log('xCounts:', xCounts);
-    // console.log('mostFrequentX:', mostFrequentX);
-    // console.log('mostFrequentObjects:', mostFrequentObjects);
-
-    //返回结果
-    return mostFrequentObjects;
 }
 
 /**
@@ -643,11 +655,16 @@ function findMostFrequentX(filteredNotes) {
  * @param {*} serachKey 
  */
 function doSearch(serachKey) {
-    if (isHomePage) {
+    if (isHomePage()) {
         const btn = className("android.widget.Button").find();
         const searchBtn = btn.filter(function (note) {
             return note.desc() && note.desc() == "搜索";
         });
+
+        if (!searchBtn && searchBtn.length <= 0) {
+            console.log('搜索按钮未找到')
+        }
+
         press(searchBtn[0].center().x, searchBtn[0].center().y, 100)
         console.log(`点击搜索按钮`);
         sleep(getRandomInt(3000, 5000));
