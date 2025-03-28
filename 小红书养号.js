@@ -4,10 +4,10 @@ var serachKey = '省钱';
 
 var rednote = {}
 
+var config = undefined;
 
-
-rednote.run = function (config) {
-    auto.service.ensureEnabled();
+rednote.run = function (arg) {
+    config = arg;
     launchApp("小红书");
     sleep(getRandomInt(5000, 8000));
 

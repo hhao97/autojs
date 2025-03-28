@@ -1,5 +1,4 @@
 "ui";
-
 var color = "#02685B";
 
 var config = {
@@ -16,6 +15,7 @@ var config = {
     // 脚本允许时长(分钟)
     taskRuntime: '10'
 }
+
 
 ui.layout(
     <drawer id="drawer">
@@ -150,7 +150,7 @@ ui.layout(
                     <horizontal> <img w="50" h="50" padding="16" src="{{this.icon}}" tint="{{color}}" />
                         <text textColor="black" textSize="15sp" text="{{this.title}}" layout_gravity="center" /></horizontal>
                     <text layout_weight='1'></text>
-                    <horizontal><switch checked="{{this.checked}}"></switch></horizontal>
+                    <horizontal><switch checked="{{this.checked}}" id='{{this.id}}'></switch></horizontal>
                 </horizontal>
             </list>
         </vertical>
@@ -188,7 +188,13 @@ ui.startBtn.on("click", () => {
     ui.startBtnText.setText('执行中...')
 
     thread = threads.start(function () {
-        rednote.run();
+        //程序开始运行之前判断无障碍服务
+        if (auto.service == null) {
+            toast("请先开启无障碍服务！");
+            return;
+        }
+
+        rednote.run(config);
     });
 
     console.log(parseInt(config.taskRuntime) * 60);
@@ -197,21 +203,11 @@ ui.startBtn.on("click", () => {
     let timer = setTimeout(() => {
         thread.interrupt();
         console.log("自动程序已关闭");
+        thread = undefined;
     }, timeout);
 });
 
-// console
-// .setSize(0.8, 0.3)
-// .setPosition(0.02, 0.001)
-// .setTitle('日志')
-// .setTitleTextSize(10)
-// .setContentTextSize(10)
-// .setBackgroundColor('#80000000')
-// .setTitleBackgroundAlpha(0.8)
-// .setContentBackgroundAlpha(0.5)
-// .setExitOnClose(6e3)
-// .setTouchable(false)
-// .show();
+
 
 
 ui.endBtn.on("click", () => {
@@ -270,27 +266,67 @@ ui.tabs.setupWithViewPager(ui.viewpager);
 ui.toolbar.setupWithDrawer(ui.drawer);
 
 
-// 自定义菜单项布局
-let menuItemLayout = (title, checked) => {
-    return (
-        <horizontal padding="16">
-            {/* <text text={title} layout_weight="1" gravity="center_vertical" /> */}
-            <switch id="mySwitch" checked={checked} />
-        </horizontal>
-    );
-};
 
 let menuItems = [
-    { title: "无障碍服务", checked: auto.service.enabled, icon: "@drawable/ic_android_black_48dp" },
-    { title: "选项二", checked: false, icon: "@drawable/ic_settings_black_48dp" },
-    { title: "选项三", checked: true, icon: "@drawable/ic_favorite_black_48dp" },
-    { title: "退出", checked: false, icon: "@drawable/ic_exit_to_app_black_48dp" },
+    { title: "无障碍服务", id: '无障碍服务', checked: auto.service, icon: "@drawable/ic_android_black_48dp" },
+    { title: "日志窗口", id: '日志窗口', checked: console.isShowing(), icon: "@drawable/ic_android_black_48dp" },
 ];
 
+
+$ui.post(() => {
+    ui.无障碍服务.on("check", function (checked) {
+        // 用户勾选无障碍服务的选项时，跳转到页面让用户去开启
+        if (checked && auto.service == null) {
+            app.startActivity({
+                action: "android.settings.ACCESSIBILITY_SETTINGS"
+            });
+        }
+        if (!checked && auto.service != null) {
+            auto.service.disableSelf();
+        }
+    });
+
+    ui.日志窗口.on("check", function (checked) {
+        if (checked) {
+            console
+                .setSize(0.8, 0.3)
+                .setPosition(0.02, 0.001)
+                .setTitle('日志(+音量键可关闭脚本)')
+                .setTitleTextSize(10)
+                .setContentTextSize(10)
+                .setBackgroundColor('#80000000')
+                .setTitleBackgroundAlpha(0.8)
+                .setContentBackgroundAlpha(0.5)
+                .setExitOnClose(6e3)
+                .setExitOnClose(true)
+                .setTouchable(false)
+                .show();
+        } else {
+            console.hide();
+        }
+    });
+
+    ui.emitter.on("resume", function () {
+        ui.无障碍服务.checked = auto.service != null;
+        ui.日志窗口.checked = console.isShowing()
+    });
+}, 1000);
+
+events.observeKey();
+events.setKeyInterceptionEnabled(true);
+events.on('volume_up', () => {
+    console.hide();
+    exit();
+    thread.interrupt()
+});
+events.on('volume_down', () => {
+    exit();
+    thread.interrupt()
+});
 ui.menu.setDataSource(menuItems.map(item => {
     let menuItem = {
+        id: item.id,
         title: item.title,
-        layout: menuItemLayout(item.title, item.checked),
         checked: item.checked
     };
     if (item.icon) {
@@ -299,16 +335,6 @@ ui.menu.setDataSource(menuItems.map(item => {
     return menuItem;
 }));
 
-ui.menu.on("item_click", (item, i, itemView) => {
-    try {
-        let switchView = itemView.mySwitch;
-        let checked = switchView.isChecked();
-        menuItems[i].checked = checked;
-        toast(item.title + " 开关状态：" + (checked ? "开启" : "关闭"));
-    } catch (e) {
-        toast("获取开关状态失败：" + e);
-    }
-});
 
 ui.menu.on("item_click", item => {
     switch (item.title) {
