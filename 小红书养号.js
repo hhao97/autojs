@@ -8,6 +8,7 @@ var config = undefined;
 
 rednote.run = function (arg) {
     config = arg;
+    console.log('参数配置:',config)
     launchApp(config.app);
     sleep(getRandomInt(5000, 8000));
     main();

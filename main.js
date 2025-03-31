@@ -1,6 +1,8 @@
 "ui";
-var color = "#02685B";
 
+const CustomToast = require("./common/custom-toast.js");
+
+var color = "#02685B";
 var config = {
     app: "小红书",
     // 用户评论点赞概率
@@ -249,7 +251,7 @@ ui.rateUserSeekbar.setOnSeekBarChangeListener({
 
 //创建选项菜单(右上角)
 ui.emitter.on("create_options_menu", menu => {
-    // menu.add("设置");
+    menu.add("设置");
     menu.add("关于");
 });
 
@@ -258,10 +260,10 @@ ui.emitter.on("options_item_selected", (e, item) => {
 
     switch (item.getTitle()) {
         case "设置":
-            toast("施工中...");
+            console.launch();
             break;
         case "关于":
-            alert("施工中...");
+            CustomToast.show('show')
             break;
     }
     e.consumed = true;
