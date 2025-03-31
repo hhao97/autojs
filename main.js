@@ -16,7 +16,7 @@ var config = {
     prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。',
     // 脚本允许时长(分钟)
     taskRuntime: '10',
-    searchKey:'省钱|好物|母婴|生娃|育儿|怀孕'
+    searchKey: '省钱|好物|母婴|生娃|育儿|怀孕'
 }
 
 
@@ -24,7 +24,7 @@ ui.layout(
     <drawer id="drawer">
         <vertical>
             <appbar>
-                <toolbar id="toolbar" title="示例" />
+                <toolbar id="toolbar" title="欢迎使用" />
                 <tabs id="tabs" />
             </appbar>
             <viewpager id="viewpager">
@@ -160,10 +160,14 @@ ui.layout(
         <vertical layout_gravity="left" bg="#ffffff" w="280">
             <list id="menu">
                 <horizontal bg="?selectableItemBackground" w="*" gravity='center' marginBottom='10'>
-                    <horizontal> <img w="50" h="50" padding="16" src="{{this.icon}}" tint="{{color}}" />
-                        <text textColor="black" textSize="15sp" text="{{this.title}}" layout_gravity="center" /></horizontal>
+                    <horizontal>
+                         <img w="50" h="50" padding="16" src="{{this.icon}}" tint="{{color}}" />
+                        <text textColor="black" textSize="15sp" text="{{this.title}}" layout_gravity="center" />
+                    </horizontal>
                     <text layout_weight='1'></text>
-                    <horizontal><switch checked="{{this.checked}}" id='{{this.id}}'></switch></horizontal>
+                    <horizontal>
+                        <switch checked="{{this.checked}}" id='{{this.id}}'></switch>
+                    </horizontal>
                 </horizontal>
             </list>
         </vertical>
@@ -195,7 +199,7 @@ ui.startBtn.on("click", () => {
     var curTime = new Date();
 
     const exitTime = new Date(curTime.setMinutes(curTime.getMinutes() + config.taskRuntime));
-    toastLog('脚本结束时间: ' + formatDate(exitTime))
+    CustomToast.show('脚本结束时间: ' + formatDate(exitTime))
 
     console.log(`脚本执行时间 ${config.taskRuntime} 分`)
     ui.startBtnText.setText('执行中...')
@@ -203,7 +207,7 @@ ui.startBtn.on("click", () => {
     thread = threads.start(function () {
         //程序开始运行之前判断无障碍服务
         if (auto.service == null) {
-            toastLog("请先开启无障碍服务！");
+            CustomToast.show("请先开启无障碍服务！");
             return;
         }
 
@@ -351,7 +355,7 @@ events.on('key_down', (keyCode, event) => {
 
 events.on('volume_down', () => {
     console.hide();
-    if(thread && thread.isAlive()){
+    if (thread && thread.isAlive()) {
         thread.interrupt()
     }
     exit();

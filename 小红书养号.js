@@ -6,6 +6,7 @@ var rednote = {}
 
 var config = undefined;
 
+
 rednote.run = function (arg) {
     config = arg;
     console.log('参数配置:',config)
