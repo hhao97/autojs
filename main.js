@@ -1,22 +1,24 @@
 "ui";
 
+const customToast = require("./common/custom-toast.js");
 const CustomToast = require("./common/custom-toast.js");
 
 var color = "#02685B";
 var config = {
     app: "小红书",
     // 用户评论点赞概率
-    userCommentLikeRate: '30',
+    userCommentLikeRate: '50',
     // 作品点赞概率
-    commentLikeRate: '20',
+    commentLikeRate: '50',
     // 评论概率
-    commentRate: '10',
+    commentRate: '50',
     // deepseek ai 评论 key
     dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
     prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。',
     // 脚本允许时长(分钟)
     taskRuntime: '10',
-    searchKey: '省钱|好物|母婴|生娃|育儿|怀孕'
+    searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
+    endTime: ''
 }
 
 
@@ -161,7 +163,7 @@ ui.layout(
             <list id="menu">
                 <horizontal bg="?selectableItemBackground" w="*" gravity='center' marginBottom='10'>
                     <horizontal>
-                         <img w="50" h="50" padding="16" src="{{this.icon}}" tint="{{color}}" />
+                        <img w="50" h="50" padding="16" src="{{this.icon}}" tint="{{color}}" />
                         <text textColor="black" textSize="15sp" text="{{this.title}}" layout_gravity="center" />
                     </horizontal>
                     <text layout_weight='1'></text>
@@ -195,11 +197,9 @@ ui.startBtn.on("click", () => {
     if (thread) {
         return
     }
-
-    var curTime = new Date();
-
-    const exitTime = new Date(curTime.setMinutes(curTime.getMinutes() + config.taskRuntime));
-    CustomToast.show('脚本结束时间: ' + formatDate(exitTime))
+    
+    config.endTime = calculateFutureTime(config.taskRuntime);
+    CustomToast.show('脚本结束时间: ' + config.endTime)
 
     console.log(`脚本执行时间 ${config.taskRuntime} 分`)
     ui.startBtnText.setText('执行中...')
@@ -209,6 +209,23 @@ ui.startBtn.on("click", () => {
         if (auto.service == null) {
             CustomToast.show("请先开启无障碍服务！");
             return;
+        }
+        
+        if (!console.isShowing()) {
+            console
+                .setSize(0.8, 0.3)
+                .setPosition(0.02, 0.001)
+                .setTitle('日志(加音量键可开关日志浮窗)')
+                .setTitleTextSize(10)
+                .setContentTextSize(10)
+                .setBackgroundColor('#80000000')
+                .setTitleBackgroundAlpha(0.8)
+                .setContentBackgroundAlpha(0.5)
+                .setExitOnClose(6e3)
+                .setTouchable(false)
+                .show();
+        } else {
+            console.hide();
         }
 
         rednote.run(config);
@@ -226,6 +243,27 @@ ui.startBtn.on("click", () => {
 
 
 
+function calculateFutureTime(minutes) {
+    // 获取当前时间
+    const now = new Date();
+
+    // 将分钟数转换为毫秒
+    const millisecondsToAdd = minutes * 60 * 1000;
+
+    // 计算未来的时间
+    const futureTime = new Date(now.getTime() + millisecondsToAdd);
+
+    // 格式化日期和时间
+    const year = futureTime.getFullYear();
+    const month = String(futureTime.getMonth() + 1).padStart(2, '0'); // 月份从 0 开始，需要加 1
+    const day = String(futureTime.getDate()).padStart(2, '0');
+    const hours = String(futureTime.getHours()).padStart(2, '0');
+    const minutesFormatted = String(futureTime.getMinutes()).padStart(2, '0');
+    const seconds = String(futureTime.getSeconds()).padStart(2, '0');
+
+    // 返回格式化的日期和时间字符串
+    return `${year}-${month}-${day} ${hours}:${minutesFormatted}:${seconds}`;
+}
 
 ui.endBtn.on("click", () => {
     if (thread) {
@@ -315,7 +353,6 @@ $ui.post(() => {
                 .setTitleBackgroundAlpha(0.8)
                 .setContentBackgroundAlpha(0.5)
                 .setExitOnClose(6e3)
-                .setExitOnClose(true)
                 .setTouchable(false)
                 .show();
         } else {
@@ -329,37 +366,20 @@ $ui.post(() => {
     });
 }, 1000);
 
-events.observeKey();
-events.setKeyInterceptionEnabled(true);
-events.on('key_down', (keyCode, event) => {
-    if (keyCode == 24) {
-        if (!console.isShowing()) {
-            console
-                .setSize(0.8, 0.3)
-                .setPosition(0.02, 0.001)
-                .setTitle('日志(加音量键可开关日志浮窗)')
-                .setTitleTextSize(10)
-                .setContentTextSize(10)
-                .setBackgroundColor('#80000000')
-                .setTitleBackgroundAlpha(0.8)
-                .setContentBackgroundAlpha(0.5)
-                .setExitOnClose(6e3)
-                .setExitOnClose(true)
-                .setTouchable(false)
-                .show();
-        } else {
-            console.hide();
-        }
-    }
-});
+// console.log(`无障碍服务`, auto.service != null)
+// events.observeKey();
+// events.setTouchEventTimeout(3000)
+    
 
-events.on('volume_down', () => {
-    console.hide();
-    if (thread && thread.isAlive()) {
-        thread.interrupt()
-    }
-    exit();
-});
+ 
+// events.on('volume_down', () => {
+//     console.hide();
+//     if (thread && thread.isAlive()) {
+//         thread.interrupt()
+//     }
+//     exit();
+// });
+
 
 ui.menu.setDataSource(menuItems.map(item => {
     let menuItem = {
@@ -381,14 +401,3 @@ ui.menu.on("item_click", item => {
             break;
     }
 })
-
-
-function formatDate(date) {
-    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
-
-    const formattedDate = date.toLocaleDateString(undefined, dateOptions);
-    const formattedTime = date.toLocaleTimeString(undefined, timeOptions);
-
-    return `${formattedDate} ${formattedTime}`;
-}

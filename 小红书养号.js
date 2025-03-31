@@ -1,22 +1,23 @@
-var count = 30;
+var count = 100;
 var failCount = 0;
 var errorCount = 3;
 
-var rednote = {}
-
-var config = undefined;
-
-
-rednote.run = function (arg) {
-    config = arg;
-    console.log('参数配置:',config)
-    launchApp(config.app);
-    sleep(getRandomInt(5000, 8000));
-    main();
+var config = {
+    app: "小红书",
+    // 用户评论点赞概率
+    userCommentLikeRate: '50',
+    // 作品点赞概率
+    commentLikeRate: '50',
+    // 评论概率
+    commentRate: '50',
+    // deepseek ai 评论 key
+    dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
+    prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。',
+    // 脚本允许时长(分钟)
+    taskRuntime: '10',
+    searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
+    endTime: ''
 }
-
-module.exports = rednote;
-
 
 function main() {
     try {
@@ -25,7 +26,7 @@ function main() {
                 break;
             }
 
-            console.log(`剩余次数：${count} 失败次数：${failCount}`);
+            console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
 
             // 下滑操作
             swipeDown();
@@ -61,7 +62,7 @@ function main() {
     } catch (e) {
         console.log("脚本出错：", e, "当前运行错误次数", errorCount);
         if (errorCount > 0) {
-            main();
+            // main();
             errorCount--;
         }
     }
@@ -87,7 +88,7 @@ function enterNote(textNote) {
         if (isTextNotePage) {
             let noteObj = getTextNoteContent();
 
-            for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < 10; i++) {
                 randomExcute(50, swipeLeft, '左滑');
                 randomExcute(50, swipeRight, '右滑');
             }
@@ -149,14 +150,20 @@ function randomExcute(rate, func, action, param) {
     if (hitProbability(rate, action)) {
         func(param);
     }
+
+    if (isVideoNote()) {
+        getGoBackByNote()
+    }
 }
 
 function doComment(noteObj) {
     if (!isTextNotePage) {
+        console.log(`不在笔记详情页不评论`, noteObj)
         return
     }
 
     if (!noteObj) {
+        console.log(`笔记内容获取为空，不评论`, noteObj)
         return
     }
     let aiResult = callDeepSeek(`笔记标题：${noteObj.title} 笔记内容：${noteObj.content}`);
@@ -206,7 +213,6 @@ function getRandomInt(min, max) {
     // 生成随机整数
     const randomNumber = Math.floor(Math.random() * (roundedMax - roundedMin + 1)) + roundedMin;
     const result = Math.max(1, randomNumber);
-    console.log(`随机数：${result} `);
     // 确保随机数是正数
     return result;
 }
@@ -365,7 +371,9 @@ function hitProbability(probability, action) {
     let flag = false;
     // 检查是否命中
     flag = randomValue < probability
-    console.log(`随机动作-${action}：概率：${probability} 是否执行：${flag}`);
+    if (flag) {
+        console.log(`随机动作-${action} 执行 `);
+    }
 
     return flag;
 }
@@ -501,9 +509,8 @@ function isVideoNote() {
     });
 
     let result = filteredNotes != undefined && filteredNotes[0] != undefined && filteredNotes != null && filteredNotes[0] != null;
-    if (result) {
-        console.log(`视频笔记`);
-    }
+   
+    console.log(`是否是视频笔记`, result)
     return result
 }
 
@@ -512,15 +519,13 @@ function isVideoNote() {
  * @returns  是否是首页
  */
 function isHomePage() {
-    const requiredTexts = ["发现", "关注"];
+    const requiredTexts = ["发现", "首页"];
     const notes = className("android.widget.TextView").find();
     const result = requiredTexts.every(text =>
         notes.some(note => note.text() === text)
     );
-    if (result) {
-        console.log(`首页`);
-    }
 
+    console.log(`是否是首页`, result)
     return result;
 }
 
@@ -535,9 +540,9 @@ function isSearchResultPage() {
     const result = requiredTexts.every(text =>
         notes.some(note => note.text() === text)
     );
-    if (result) {
-        console.log(`搜索结果页`);
-    }
+ 
+    console.log(`是否是搜索结果页`, result)
+
     return result;
 }
 
@@ -546,7 +551,7 @@ function isSearchResultPage() {
  */
 function isTextNotePage() {
     const requiredTexts = ["分享"];
-    const notes = className("android.widget.TextView").find();
+    const notes = className("android.widget.Button").find();
     const result = requiredTexts.every(text =>
         notes.some(note => note.desc() === text)
     );
@@ -692,11 +697,15 @@ function doSearch(serachKey) {
     }
 }
 
-// main();
 
+// module.exports = rednote;
 
 // console.log(isHomePage());
-// console.log(isSearchResultPage());
+// isSearchResultPage();
+// isTextNotePage();
+// isHomePage();
+// isVideoNote();
+
 
 // getTextNoteContent();
 // console.log(isVideoNote())
@@ -709,3 +718,19 @@ function doSearch(serachKey) {
 // doLikeByNote();
 
 // doSearch("购物返利");
+
+
+// launchApp('小红书');
+// sleep(getRandomInt(5000, 8000));
+// main();
+
+
+
+// var rednote = {}
+// rednote.run = function (arg) {
+//     config = arg;
+//     console.log('参数配置:', config)
+//     launchApp(config.app);
+//     sleep(getRandomInt(5000, 8000));
+//     main();
+// }
