@@ -501,17 +501,12 @@ function findRecommandTextNote() {
  * @returns 是否是视频笔记
  */
 function isVideoNote() {
-    let notes = className("android.widget.ImageView")
-        .find();
+    let notes = className("android.widget.ImageView").desc('搜索')
+        .exists();
 
-    let filteredNotes = notes.filter(function (note) {
-        return note.desc() && note.desc().includes("搜索");
-    });
 
-    let result = filteredNotes != undefined && filteredNotes[0] != undefined && filteredNotes != null && filteredNotes[0] != null;
-   
-    console.log(`是否是视频笔记`, result)
-    return result
+    console.log(`是否是视频笔记`, notes)
+    return notes
 }
 
 /**
@@ -534,43 +529,25 @@ function isHomePage() {
  * @returns 是否是搜索结果页
  */
 function isSearchResultPage() {
-    const requiredTexts = ["搜索", "全部", "用户", "话题"];
-    const notes = className("android.widget.TextView").find();
-
-    const result = requiredTexts.every(text =>
-        notes.some(note => note.text() === text)
-    );
- 
-    console.log(`是否是搜索结果页`, result)
-
-    return result;
+    const notes = className("android.widget.TextView").text('筛选').exists();
+    console.log(`是否是搜索结果页`, notes)
+    return notes;
 }
 
 /**
  * 是否是图文笔记详情页
  */
 function isTextNotePage() {
-    const requiredTexts = ["分享"];
-    const notes = className("android.widget.Button").find();
-    const result = requiredTexts.every(text =>
-        notes.some(note => note.desc() === text)
-    );
-    console.log(`是否是图文笔记详情页`, result)
-    return result;
+    const notes = className("android.widget.Button").desc("分享").exists();
+    console.log(`是否是图文笔记详情页`, notes)
+    return notes;
 }
-
 
 /**
  * 是否是消息列表页
  */
 function isMessagePage() {
-    const requiredTexts = ["消息", '发现群聊'];
-    const notes = className("android.widget.TextView").find();
-    const result = requiredTexts.every(text =>
-        notes.some(note => note.text() === text)
-    );
-    console.log(`是否是消息列表页`, result)
-    return result;
+    return textContains('消息').exists() && textContains('发现群聊').exists()
 }
 
 
@@ -707,7 +684,7 @@ function doSearch(serachKey) {
 // isVideoNote();
 
 
-// getTextNoteContent();
+getTextNoteContent();
 // console.log(isVideoNote())
 // getGoBackByNote()
 // console.log(isTextNotePage());
@@ -716,16 +693,17 @@ function doSearch(serachKey) {
 
 // isMessagePage();
 // doLikeByNote();
+// isTextNotePage()
 
-// doSearch("购物返利");
-
+// isVideoNote();
 
 // launchApp('小红书');
 // sleep(getRandomInt(5000, 8000));
 // main();
+// isMessagePage();
 
-
-
+doLikeByUser();
+// console.log(isMessagePage())
 // var rednote = {}
 // rednote.run = function (arg) {
 //     config = arg;
