@@ -192,55 +192,55 @@ ui.endBtn.setBackground(gradientDrawableRed);
 
 var thread = undefined;
 
-ui.运行时长.
+ui.运行时长.on("textChanged", function (text, oldText, view) {
+    console.log("文本从 " + oldText + " 变为 " + text);
+});
 
 // 设置按钮点击事件
 ui.startBtn.on("click", () => {
     if (thread) {
         return
     }
-    
+
+    config.taskRuntime = $ui.运行时长.text();
+
     config.endTime = calculateFutureTime(config.taskRuntime);
     CustomToast.show('脚本结束时间: ' + config.endTime)
 
     console.log(`脚本执行时间 ${config.taskRuntime} 分`)
     ui.startBtnText.setText('执行中...')
-
     thread = threads.start(function () {
         //程序开始运行之前判断无障碍服务
         if (auto.service == null) {
             CustomToast.show("请先开启无障碍服务！");
             return;
         }
-        
-        if (!console.isShowing()) {
-            console
-                .setSize(0.8, 0.3)
-                .setPosition(0.02, 0.001)
-                .setTitle('日志(加音量键可开关日志浮窗)')
-                .setTitleTextSize(10)
-                .setContentTextSize(10)
-                .setBackgroundColor('#80000000')
-                .setTitleBackgroundAlpha(0.8)
-                .setContentBackgroundAlpha(0.5)
-                .setExitOnClose(6e3)
-                .setTouchable(false)
-                .show();
-        } else {
-            console.hide();
-        }
+
+        console
+            .setSize(0.8, 0.3)
+            .setPosition(0.02, 0.001)
+            .setTitle('日志(加音量键可开关日志浮窗)')
+            .setTitleTextSize(10)
+            .setContentTextSize(10)
+            .setBackgroundColor('#80000000')
+            .setTitleBackgroundAlpha(0.8)
+            .setContentBackgroundAlpha(0.5)
+            .setExitOnClose(6e3)
+            .setTouchable(false)
+            .show();
 
         rednote.run(config);
     });
 
-    console.log(parseInt(config.taskRuntime) * 60);
+
     const timeout = parseInt(config.taskRuntime) * 60 * 1000;
 
     let timer = setTimeout(() => {
         thread.interrupt();
         thread = undefined;
         console.log("自动程序已关闭");
-        ui.startBtnText.setText('开始')
+        ui.startBtnText.setText('开始');
+        console.hide();
     }, timeout);
 });
 
@@ -373,9 +373,9 @@ $ui.post(() => {
 // console.log(`无障碍服务`, auto.service != null)
 // events.observeKey();
 // events.setTouchEventTimeout(3000)
-    
 
- 
+
+
 // events.on('volume_down', () => {
 //     console.hide();
 //     if (thread && thread.isAlive()) {

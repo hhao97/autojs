@@ -38,20 +38,24 @@ function main() {
             console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
 
             // 下滑操作
-            swipeDown();
-            swipeDown();
-            swipeDown();
+            for (let i = 0; i < 5; i++) {
+                randomExcute(50, swipeDown, '下滑');
+            }
 
             let textNote = undefined;
 
             if (config.searchKey != '') {
                 const searchKeys = config.searchKey.split('|')
                 doSearch(searchKeys[getRandomInt(0, searchKeys.length - 1)]);
+
             }
 
             if (isHomePage()) {
                 textNote = findRecommandTextNote();
             } else if (isSearchResultPage()) {
+                for (let i = 0; i < 10; i++) {
+                    randomExcute(50, swipeDown, '下滑');
+                }
                 textNote = findSearchTextNote();
             } else {
                 console.log("暂不支持的页面，尝试返回");
@@ -70,7 +74,7 @@ function main() {
     } catch (e) {
         console.log("脚本出错：", e, "当前运行错误次数", errorCount);
         if (errorCount > 0) {
-            // main();
+            main();
             errorCount--;
         }
     }
@@ -86,7 +90,7 @@ function enterNote(textNote) {
     try {
         sleep(getRandomInt(2000, 3000));
         console.log(`列表页点击笔记 ${JSON.stringify(textNote)}`);
-        press(textNote.center.x, textNote.center.y, getRandomInt(100, 300))
+        press(textNote.center.x, textNote.center.y)
         sleep(getRandomInt(2000, 3000));
 
         if (isVideoNote()) {
@@ -454,7 +458,7 @@ function findSearchTextNote() {
     let filteredNotes = className("android.widget.TextView").depth(13)
         .find();
 
-    filteredNotes = notes.filter(function (note) {
+    filteredNotes = filteredNotes.filter(function (note) {
         return note.text() && note.text().length >= 10;
     });
 
@@ -565,7 +569,7 @@ function doLikeByNote(noteObj) {
             noteObj = getTextNoteContent();
         }
         sleep(getRandomInt(2000, 3000));
-        press(noteObj.likeCenter.x, noteObj.likeCenter.y, 100)
+        press(noteObj.likeCenter.x, noteObj.likeCenter.y)
         console.log(`点赞笔记`, noteObj.likeCenter.x, noteObj.likeCenter.y);
     }
 }
@@ -586,7 +590,7 @@ function doLikeByUser() {
             const randomIdx = getRandomInt(0, filteredNotes.length - 1);
             console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
             sleep(getRandomInt(2000, 3000));
-            press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y, 100)
+            press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y)
         }
     }
 }
@@ -654,7 +658,7 @@ function doSearch(serachKey) {
             console.log('搜索按钮未找到')
         }
 
-        press(searchBtn[0].center().x, searchBtn[0].center().y, 100)
+        press(searchBtn[0].center().x, searchBtn[0].center().y)
         console.log(`点击搜索按钮`);
         sleep(getRandomInt(3000, 5000));
 
@@ -672,7 +676,7 @@ function doSearch(serachKey) {
             return note.text() && note.text() == "搜索";
         });
 
-        press(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y, 300);
+        press(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y);
         console.log(`点击搜索按钮`);
 
         sleep(getRandomInt(3000, 5000));
