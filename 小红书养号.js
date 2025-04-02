@@ -1,7 +1,7 @@
 var count = 100;
 var failCount = 0;
 var errorCount = 3;
-
+var rednote = {};
 var config = {
     app: "小红书",
     // 用户评论点赞概率
@@ -18,6 +18,15 @@ var config = {
     searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
     endTime: ''
 }
+
+rednote.run = function (arg) {
+    config = arg;
+    console.log('参数配置:', config)
+    launchApp(config.app);
+    sleep(getRandomInt(5000, 8000));
+    main();
+}
+
 
 function main() {
     try {
@@ -54,7 +63,6 @@ function main() {
             console.log(`找到笔记 ${textNote.length}条`,);
             if (textNote.length > 0) {
                 enterNote(textNote[getRandomInt(0, textNote.length - 1)]);
-
                 getGoBackByNote();
                 swipeDown();
             }
@@ -68,6 +76,7 @@ function main() {
     }
 }
 
+module.exports = rednote;
 
 
 /**
@@ -81,11 +90,10 @@ function enterNote(textNote) {
         sleep(getRandomInt(2000, 3000));
 
         if (isVideoNote()) {
-            console.log(`视频笔记，跳过`);
             return
         }
 
-        if (isTextNotePage) {
+        if (isTextNotePage()) {
             let noteObj = getTextNoteContent();
 
             for (let i = 0; i < 10; i++) {
@@ -106,9 +114,6 @@ function enterNote(textNote) {
             // 随机用户评论点赞
             randomExcute(config.userCommentLikeRate, doLikeByUser, '点赞');
 
-        } else {
-            console.log(`不是图文笔记详情页,点击返回`);
-            getGoBackByNote();
         }
 
 
@@ -126,20 +131,21 @@ function getTextNoteContent() {
     let noteText = className("android.widget.TextView").find();
     let length = noteText.length;
 
+    let content = className("android.widget.TextView").depth(15).find();
+    let contents = content.map(e => {
+        return e.text() && e.text().replace(/[\r\n]+/g, '');
+    });
+
+
     let noteObj = {
         author: noteText[0].text(),
-        title: noteText[2].text() == '试试文字发笔记' ? noteText[4].text() : noteText[2].text(),
-        content: noteText[3].text() == '去发布' ? noteText[5].text() : noteText[3].text(),
+        content: contents.join(),
         commentCount: noteText[length - 1].text(),
         likeCount: noteText[length - 3].text(),
         collectCount: noteText[length - 2].text(),
         commentCenter: noteText[length - 1].center(),
         likeCenter: noteText[length - 3].center(),
         collectCenter: noteText[length - 2].center()
-    }
-
-    if (noteObj.title.includes('/')) {
-        return null;
     }
 
     console.log(`获取笔记内容：${JSON.stringify(noteObj)}`);
@@ -149,10 +155,6 @@ function getTextNoteContent() {
 function randomExcute(rate, func, action, param) {
     if (hitProbability(rate, action)) {
         func(param);
-    }
-
-    if (isVideoNote()) {
-        getGoBackByNote()
     }
 }
 
@@ -166,7 +168,7 @@ function doComment(noteObj) {
         console.log(`笔记内容获取为空，不评论`, noteObj)
         return
     }
-    let aiResult = callDeepSeek(`笔记标题：${noteObj.title} 笔记内容：${noteObj.content}`);
+    let aiResult = callDeepSeek(`笔记内容：${noteObj.content}`);
 
     let notes = className("android.widget.TextView")
         .find();
@@ -263,31 +265,30 @@ function parseNoteDesc(desc, center) {
 
 
 /**
- * 获取笔记返回按钮 
- * @returns 笔记返回按钮
+ * 模拟“返回”或“关闭”操作，并处理找不到明确按钮的情况。
+ *
+ * @returns {boolean} 如果成功执行了返回或关闭操作，则返回 true；否则返回 false。
  */
 function getGoBackByNote() {
     sleep(getRandomInt(2000, 3000));
-    let goBack = className('android.widget.Button').find();
-    let filteredNotes = goBack.filter(function (note) {
-        return note.desc() && note.desc().includes("返回");
-    });
+    let filteredNotes = className('android.widget.Button').desc('返回').find();
 
     if (filteredNotes.length == 0) {
-        goBack = className('android.widget.ImageView').find();
-        filteredNotes = goBack.filter(function (note) {
-            return note.desc() && note.desc().includes("返回");
-        });
+        filteredNotes = className('android.widget.ImageView').desc('返回').find();
     }
 
     if (filteredNotes.length > 0) {
-        // console.log(`找到返回按钮 x:${filteredNotes[0].center().x} y:${filteredNotes[0].center().y}`);
         if (filteredNotes[0]) {
             console.log(`点击返回按钮`);
-            press(filteredNotes[0].center().x, filteredNotes[0].center().y, 100)
+            filteredNotes[0].click()
             return
         }
     }
+    // 直播间退出
+    if (className('android.widget.Button').desc('关闭').find().click()) {
+        sleep(getRandomInt(1000, 2000))
+        className('android.widget.Button').text('退出').findOne().click()
+    };
 
     console.log(`按下返回按钮`, back())
     return null;
@@ -450,12 +451,13 @@ function getContentFromJson(jsonString) {
  * @returns 查询后的笔记筛选
  */
 function findSearchTextNote() {
-    let notes = className("android.widget.TextView")
+    let filteredNotes = className("android.widget.TextView").depth(13)
         .find();
 
-    let filteredNotes = notes.filter(function (note) {
-        return note.text() && note.text().length >= 12;
+    filteredNotes = notes.filter(function (note) {
+        return note.text() && note.text().length >= 10;
     });
+
     filteredNotes = filteredNotes.filter(function (note) {
         return note.center().x < device.width * 0.8 && note.center().y < device.height * 0.8;
     });
@@ -504,6 +506,10 @@ function isVideoNote() {
     let notes = className("android.widget.ImageView").desc('搜索')
         .exists();
 
+    if (notes) {
+        console.log('当前视频笔记页，暂不支持');
+        getGoBackByNote();
+    }
 
     console.log(`是否是视频笔记`, notes)
     return notes
@@ -539,7 +545,6 @@ function isSearchResultPage() {
  */
 function isTextNotePage() {
     const notes = className("android.widget.Button").desc("分享").exists();
-    console.log(`是否是图文笔记详情页`, notes)
     return notes;
 }
 
@@ -569,7 +574,7 @@ function doLikeByNote(noteObj) {
  * 给用户点赞
  */
 function doLikeByUser() {
-    if (isTextNotePage) {
+    if (isTextNotePage()) {
         sleep(getRandomInt(2000, 3000));
         const likeView = className("android.widget.ImageView").find();
 
@@ -674,8 +679,19 @@ function doSearch(serachKey) {
     }
 }
 
+function isLiveRoom() {
+    let flag = textContains('看过').exists() || textContains('人气榜').exists();
+    if (flag) {
+        console.log('当前直播间页面，暂不支持')
+        getGoBackByNote();
 
-// module.exports = rednote;
+    }
+    return flag;
+}
+
+
+
+// isLiveRoom()
 
 // console.log(isHomePage());
 // isSearchResultPage();
@@ -684,7 +700,8 @@ function doSearch(serachKey) {
 // isVideoNote();
 
 
-getTextNoteContent();
+// getTextNoteContent();
+
 // console.log(isVideoNote())
 // getGoBackByNote()
 // console.log(isTextNotePage());
@@ -702,13 +719,13 @@ getTextNoteContent();
 // main();
 // isMessagePage();
 
-doLikeByUser();
+// doLikeByUser();
 // console.log(isMessagePage())
 // var rednote = {}
-// rednote.run = function (arg) {
-//     config = arg;
-//     console.log('参数配置:', config)
-//     launchApp(config.app);
-//     sleep(getRandomInt(5000, 8000));
-//     main();
-// }
+
+
+// findSearchTextNote();
+
+
+
+// getGoBackByNote();
