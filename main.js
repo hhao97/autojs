@@ -236,8 +236,9 @@ ui.startBtn.on("click", () => {
 
     let timer = setTimeout(() => {
         thread.interrupt();
-        console.log("自动程序已关闭");
         thread = undefined;
+        console.log("自动程序已关闭");
+        ui.startBtnText.setText('开始')
     }, timeout);
 });
 
@@ -269,6 +270,7 @@ ui.endBtn.on("click", () => {
     if (thread) {
         ui.startBtnText.setText('开始')
         thread.interrupt();
+        thread = undefined;
     }
 });
 
