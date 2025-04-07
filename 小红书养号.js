@@ -1,6 +1,5 @@
 var count = 100;
 var failCount = 0;
-var errorCount = 3;
 var rednote = {};
 var config = {
     app: "小红书",
@@ -18,6 +17,8 @@ var config = {
     searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
     endTime: ''
 }
+
+module.exports = rednote;
 
 rednote.run = function (arg) {
     config = arg;
@@ -60,7 +61,6 @@ function main() {
             } else {
                 console.log("暂不支持的页面，尝试返回");
                 getGoBackByNote();
-                failCount++;
                 continue
             }
 
@@ -72,15 +72,14 @@ function main() {
             }
         }
     } catch (e) {
-        console.log("脚本出错：", e, "当前运行错误次数", errorCount);
-        if (errorCount > 0) {
+        console.log("脚本出错：", e, "当前运行错误次数", failCount);
+        if (failCount > 0) {
             main();
-            errorCount--;
+            failCount++;
         }
     }
 }
 
-module.exports = rednote;
 
 
 /**
@@ -93,11 +92,7 @@ function enterNote(textNote) {
         press(textNote.center.x, textNote.center.y)
         sleep(getRandomInt(2000, 3000));
 
-        if (isVideoNote()) {
-            return
-        }
-
-        if (isTextNotePage()) {
+        if (isTextNotePage() && isVideoNote()) {
             let noteObj = getTextNoteContent();
 
             for (let i = 0; i < 10; i++) {
@@ -512,7 +507,6 @@ function isVideoNote() {
 
     if (notes) {
         console.log('当前视频笔记页，暂不支持');
-        getGoBackByNote();
     }
 
     console.log(`是否是视频笔记`, notes)

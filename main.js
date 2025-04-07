@@ -3,6 +3,7 @@
 const CustomToast = require("./common/custom-toast.js");
 var rednote = require('./小红书养号.js');
 
+
 var color = "#02685B";
 var config = {
     app: "小红书",
@@ -238,9 +239,9 @@ ui.startBtn.on("click", () => {
     let timer = setTimeout(() => {
         thread.interrupt();
         thread = undefined;
-        console.log("自动程序已关闭");
         ui.startBtnText.setText('开始');
         console.hide();
+        CustomToast.show("自动程序已关闭",8000);
     }, timeout);
 });
 
@@ -332,43 +333,44 @@ let menuItems = [
 ];
 
 
-$ui.post(() => {
-    ui.无障碍服务.on("check", function (checked) {
-        // 用户勾选无障碍服务的选项时，跳转到页面让用户去开启
-        if (checked && auto.service == null) {
-            app.startActivity({
-                action: "android.settings.ACCESSIBILITY_SETTINGS"
-            });
-        }
-        if (!checked && auto.service != null) {
-            auto.service.disableSelf();
-        }
-    });
+// $ui.post(() => {
+//     ui.无障碍服务.on("check", function (checked) {
+//         // 用户勾选无障碍服务的选项时，跳转到页面让用户去开启
+//         if (checked && auto.service == null) {
+//             app.startActivity({
+//                 action: "android.settings.ACCESSIBILITY_SETTINGS"
+//             });
+//             CustomToast.show("请开启无障碍服务");
+//         }
+//         if (!checked && auto.service != null) {
+//             auto.service.disableSelf();
+//         }
+//     });
 
-    ui.日志窗口.on("check", function (checked) {
-        if (checked) {
-            console
-                .setSize(0.8, 0.3)
-                .setPosition(0.02, 0.001)
-                .setTitle('日志(加音量键可开关日志浮窗)')
-                .setTitleTextSize(10)
-                .setContentTextSize(10)
-                .setBackgroundColor('#80000000')
-                .setTitleBackgroundAlpha(0.8)
-                .setContentBackgroundAlpha(0.5)
-                .setExitOnClose(6e3)
-                .setTouchable(false)
-                .show();
-        } else {
-            console.hide();
-        }
-    });
+//     ui.日志窗口.on("check", function (checked) {
+//         if (checked) {
+//             console
+//                 .setSize(0.8, 0.3)
+//                 .setPosition(0.02, 0.001)
+//                 .setTitle('日志(加音量键可开关日志浮窗)')
+//                 .setTitleTextSize(10)
+//                 .setContentTextSize(10)
+//                 .setBackgroundColor('#80000000')
+//                 .setTitleBackgroundAlpha(0.8)
+//                 .setContentBackgroundAlpha(0.5)
+//                 .setExitOnClose(6e3)
+//                 .setTouchable(false)
+//                 .show();
+//         } else {
+//             console.hide();
+//         }
+//     });
 
-    ui.emitter.on("resume", function () {
-        ui.无障碍服务.checked = auto.service != null;
-        ui.日志窗口.checked = console.isShowing()
-    });
-}, 1000);
+//     ui.emitter.on("resume", function () {
+//         ui.无障碍服务.checked = auto.service != null;
+//         ui.日志窗口.checked = console.isShowing()
+//     });
+// }, 1000);
 
 // console.log(`无障碍服务`, auto.service != null)
 // events.observeKey();

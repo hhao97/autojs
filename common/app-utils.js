@@ -1,6 +1,7 @@
+const utils= {}
 
 //关闭程序
-function killAPP(packageName){
+utils.killAPP =function killAPP(packageName){
     wait(() => {
         app.openAppSetting(packageName)
         return textContains("结束运行"||"强行停止").findOne(2000);
@@ -9,15 +10,18 @@ function killAPP(packageName){
             click("结束运行"||"强行停止");
             if (textContains("确定").findOne(1500)) {
                 click("确定");
-                log("结束小米社区");
+                console.log("结束小米社区");
             }else{
-                log("程序未运行");
+                console.log("程序未运行");
             }
             sleep(500);
         },
         else(){
-            log("未找到结束运行按钮，退出");
+            console.log("未找到结束运行按钮，退出");
         },
     });
 }
 // killAPP("com.xiaomi.vipaccount");
+
+
+module.exports = utils;
