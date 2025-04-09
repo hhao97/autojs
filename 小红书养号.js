@@ -48,7 +48,6 @@ function main() {
             if (config.searchKey != '') {
                 const searchKeys = config.searchKey.split('|')
                 doSearch(searchKeys[getRandomInt(0, searchKeys.length - 1)]);
-
             }
 
             if (isHomePage()) {
@@ -203,8 +202,10 @@ function doComment(noteObj) {
  */
 function getRandomInt(min, max) {
     // 确保输入是有效的数字，并且最小值小于最大值
-    if (typeof min !== 'number' || typeof max !== 'number' || min >= max) {
+    if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
         return "输入无效";
+    }else if(min == max){
+        return min;
     }
 
     // 确保最小值和最大值都是整数

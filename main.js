@@ -2,26 +2,30 @@
 
 const CustomToast = require("./common/custom-toast.js");
 var rednote = require('./小红书养号.js');
+let sto = storages.create('settings');
+
+var config = sto.get('config')
+if(!config){
+      config = {
+        app: "小红书",
+        // 用户评论点赞概率
+        userCommentLikeRate: '50',
+        // 作品点赞概率
+        commentLikeRate: '50',
+        // 评论概率
+        commentRate: '50',
+        // deepseek ai 评论 key
+        dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
+        prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版,不能用换行符。你的人物设定： 28 岁，女 。',
+        // 脚本允许时长(分钟)
+        taskRuntime: '10',
+        searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
+        endTime: ''
+    }
+}
 
 
 var color = "#02685B";
-var config = {
-    app: "小红书",
-    // 用户评论点赞概率
-    userCommentLikeRate: '50',
-    // 作品点赞概率
-    commentLikeRate: '50',
-    // 评论概率
-    commentRate: '50',
-    // deepseek ai 评论 key
-    dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
-    prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版,不能用换行符。你的人物设定： 28 岁，女 。',
-    // 脚本允许时长(分钟)
-    taskRuntime: '10',
-    searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
-    endTime: ''
-}
-
 
 ui.layout(
     <drawer id="drawer">
@@ -78,7 +82,7 @@ ui.layout(
 
                                     <vertical padding='10 0' gravity='center_vertical'>
                                         <text text="DeepSeek 提示词" textSize="14sp" textColor='#333' />
-                                        <input text='{{config.prompt}}' singleLine="false" textSize='14sp' textColor='#333' />
+                                        <input id='提示词' text='{{config.prompt}}' singleLine="false" textSize='14sp' textColor='#333' />
                                     </vertical>
 
                                     <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
@@ -87,7 +91,7 @@ ui.layout(
 
                                     <vertical padding='10 0' gravity='center_vertical'>
                                         <text text="搜索词(不填则刷首页推荐" textSize="14sp" textColor='#333' />
-                                        <input text='{{config.searchKey}}' singleLine="false" textSize='14sp' textColor='#333' />
+                                        <input id='搜索词' text='{{config.searchKey}}' singleLine="false" textSize='14sp' textColor='#333' />
                                     </vertical>
 
                                 </vertical>
@@ -197,6 +201,34 @@ ui.运行时长.on("textChanged", function (text, oldText, view) {
     console.log("文本从 " + oldText + " 变为 " + text);
 });
 
+ui.搜索词.addTextChangedListener(new android.text.TextWatcher({
+    afterTextChanged: function(s) {
+        config.searchKey =s
+        sto.put('config',config)
+    },
+    beforeTextChanged: function(s, start, count, after) {
+        // 文本变化前的回调
+    },
+    onTextChanged: function(s, start, before, count) {
+        // 文本正在变化的回调
+    }
+}));
+
+ui.提示词.addTextChangedListener(new android.text.TextWatcher({
+    afterTextChanged: function(s) {
+        config.prompt =s
+        sto.put('config',config)
+    },
+    beforeTextChanged: function(s, start, count, after) {
+        // 文本变化前的回调
+    },
+    onTextChanged: function(s, start, before, count) {
+        // 文本正在变化的回调
+    }
+}));
+
+
+
 // 设置按钮点击事件
 ui.startBtn.on("click", () => {
     if (thread) {
@@ -204,6 +236,11 @@ ui.startBtn.on("click", () => {
     }
 
     config.taskRuntime = $ui.运行时长.text();
+    config.prompt = $ui.提示词.text();
+    config.searchKey = $ui.搜索词.text();
+
+    sto.put('config', config);
+
 
     config.endTime = calculateFutureTime(config.taskRuntime);
     CustomToast.show('脚本结束时间: ' + config.endTime)
@@ -280,18 +317,24 @@ ui.endBtn.on("click", () => {
 ui.rateSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateProgress.setText(`${p}%`);
+        config.commentLikeRate =p
+        sto.put('config',config)
     }
 });
 
 ui.rateNoteSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateNoteProgress.setText(`${p}%`);
+        config.commentRate =p
+        sto.put('config',config)
     }
 });
 
 ui.rateUserSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateUserProgress.setText(`${p}%`);
+        config.userCommentLikeRate =p
+        sto.put('config',config)
     }
 });
 
