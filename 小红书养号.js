@@ -91,7 +91,7 @@ function enterNote(textNote) {
         press(textNote.center.x, textNote.center.y)
         sleep(getRandomInt(2000, 3000));
 
-        if (isTextNotePage() && isVideoNote()) {
+        if (isTextNotePage() && !isVideoNote()) {
             let noteObj = getTextNoteContent();
 
             for (let i = 0; i < 10; i++) {

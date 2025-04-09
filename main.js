@@ -90,7 +90,7 @@ ui.layout(
                                     </horizontal>
 
                                     <vertical padding='10 0' gravity='center_vertical'>
-                                        <text text="搜索词(不填则刷首页推荐" textSize="14sp" textColor='#333' />
+                                        <text text="搜索词(多个使用英文|分割，随机取值)" textSize="14sp" textColor='#333' />
                                         <input id='搜索词' text='{{config.searchKey}}' singleLine="false" textSize='14sp' textColor='#333' />
                                     </vertical>
 
