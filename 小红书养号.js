@@ -204,7 +204,7 @@ function getRandomInt(min, max) {
     // 确保输入是有效的数字，并且最小值小于最大值
     if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
         return "输入无效";
-    }else if(min == max){
+    } else if (min == max) {
         return min;
     }
 
@@ -535,8 +535,12 @@ function isHomePage() {
  */
 function isSearchResultPage() {
     const notes = className("android.widget.TextView").text('筛选').exists();
-    console.log(`是否是搜索结果页`, notes)
-    return notes;
+    var result = notes || (className("android.widget.TextView").text('全部').exists() &&
+        className("android.widget.TextView").text('用户').exists() &&
+        className("android.widget.TextView").text('话题').exists() &&
+        className("android.widget.TextView").text('商品').exists())
+    console.log(`是否是搜索结果页`, result)
+    return result;
 }
 
 /**
