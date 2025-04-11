@@ -94,7 +94,7 @@ function enterNote(textNote) {
         if (isTextNotePage() && !isVideoNote()) {
             let noteObj = getTextNoteContent();
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 randomExcute(50, swipeLeft, '左滑');
                 randomExcute(50, swipeRight, '右滑');
             }
