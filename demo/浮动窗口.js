@@ -61,7 +61,7 @@ function 日志显示(x, y, executeMethod) {
           runTimeView.setBase(android.os.SystemClock.elapsedRealtime());
           runTimeView.start();
           startButton.setText('停止');
-          startButton.attr('background', '#05a7f4');
+          startButton.attr('background', '#eee');
         } else {
           runTimeView.stop();
           startButton.setText('启动');
@@ -79,12 +79,12 @@ function 日志显示(x, y, executeMethod) {
     runTimeView.setBase(android.os.SystemClock.elapsedRealtime());
 
     floatConsole.setConsole(runtime.console); // 设置控制台
-    floatConsole.setInputEnabled(false); // 控制台输入框禁用
-    floatConsole.setColor('V', '#ffff00');
-    floatConsole.setColor('I', '#ffffff');
-    floatConsole.setColor('D', '#ffff00');
-    floatConsole.setColor('W', '#673ab7');
-    floatConsole.setColor('E', '#ff0000');
+    // floatConsole.setInputEnabled(false); // 控制台输入框禁用
+    // floatConsole.setColor('V', '#ffff00');
+    // floatConsole.setColor('I', '#ffffff');
+    // floatConsole.setColor('D', '#ffff00');
+    // floatConsole.setColor('W', '#673ab7');
+    // floatConsole.setColor('E', '#ff0000');
     floatConsole.setTextSize(13);
 
     floatyLogW.setTouchable(false);
@@ -92,6 +92,7 @@ function 日志显示(x, y, executeMethod) {
     floatyLogW.setPosition(3000, 3000);
     controller.setPosition(0, y);
   });
+
   controller.stop.click(() => {
     $app.launchPackage(context.getPackageName()); // 返回脚本应用界面
     toast('停止本次任务');
@@ -115,7 +116,7 @@ function 日志显示(x, y, executeMethod) {
       let animator = android.animation.ObjectAnimator.ofFloat(floatyLogW.main, 'translationX', 0, -1500);
       let mTimeInterpolator = new android.view.animation.DecelerateInterpolator();
       animator.setInterpolator(mTimeInterpolator);
-      animator.setDuration(3000); //动画时间
+      animator.setDuration(1000); //动画时间
       animator.start();
       setTimeout(() => {
         ui.post(() => {
@@ -136,7 +137,7 @@ function 日志显示(x, y, executeMethod) {
       let animator = android.animation.ObjectAnimator.ofFloat(floatyLogW.main, 'translationX', -1500, 0);
       let mTimeInterpolator = new android.view.animation.DecelerateInterpolator(); // 头快尾慢
       animator.setInterpolator(mTimeInterpolator);
-      animator.setDuration(3000); //动画时间
+      animator.setDuration(1000); //动画时间
       animator.start();
     }
   });
@@ -185,5 +186,11 @@ function 日志显示(x, y, executeMethod) {
   };
 }
 
-日志显示(0, 60, function(){ log("这是需要运行的函数")});
+日志显示(0, 70, function(){ 
+
+});
 setFloatyTitle('微信小程序自动下单');
+
+setInterval(() => {
+  
+}, 1000);

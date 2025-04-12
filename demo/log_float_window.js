@@ -1,3 +1,5 @@
+ui;
+
 var LogFloatWindow = /** @class */ (function () {
   function LogFloatWindow(y) {
     this.x = 0;

@@ -3,10 +3,11 @@
 const CustomToast = require("./common/custom-toast.js");
 var rednote = require('./小红书养号.js');
 let sto = storages.create('settings');
+const storeKey = 'configAA'
 
-var config = sto.get('config')
-if(!config){
-      config = {
+var config = sto.get(storeKey)
+if (!config) {
+    config = {
         app: "小红书",
         // 用户评论点赞概率
         userCommentLikeRate: '50',
@@ -14,6 +15,8 @@ if(!config){
         commentLikeRate: '50',
         // 评论概率
         commentRate: '50',
+        // 插入我加入的群聊
+        addGroupToCommentRate: '50',
         // deepseek ai 评论 key
         dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
         prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版,不能用换行符。你的人物设定： 28 岁，女 。',
@@ -22,7 +25,7 @@ if(!config){
         searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
         endTime: ''
     }
-}
+} 
 
 
 var color = "#02685B";
@@ -138,6 +141,20 @@ ui.layout(
                                         </horizontal>
                                         <seekbar id='rateNoteSeekbar' max='100' progress='{{config.commentRate}}' color='{{color}}' />
                                     </vertical>
+
+                                    <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
+                                        <frame w="*" h="1" bg='#eee' gravity="center"  ></frame>
+                                    </horizontal>
+
+                                    <vertical padding='10 0' gravity='center_vertical'>
+                                        <horizontal>
+                                            <text text="插入群聊(触发评论后)" textSize="14sp" textColor='#333' />
+                                            <text layout_weight='1'></text>
+                                            <text text="{{config.addGroupToCommentRate}}%" id='addGroupToCommentRate'></text>
+                                        </horizontal>
+                                        <seekbar id='插入群聊概率' max='100' progress='{{config.addGroupToCommentRate}}' color='{{color}}' />
+                                    </vertical>
+
                                 </vertical>
                             </card>
 
@@ -202,27 +219,27 @@ ui.运行时长.on("textChanged", function (text, oldText, view) {
 });
 
 ui.搜索词.addTextChangedListener(new android.text.TextWatcher({
-    afterTextChanged: function(s) {
-        config.searchKey =s
-        sto.put('config',config)
+    afterTextChanged: function (s) {
+        config.searchKey = s
+        sto.put(storeKey, config)
     },
-    beforeTextChanged: function(s, start, count, after) {
+    beforeTextChanged: function (s, start, count, after) {
         // 文本变化前的回调
     },
-    onTextChanged: function(s, start, before, count) {
+    onTextChanged: function (s, start, before, count) {
         // 文本正在变化的回调
     }
 }));
 
 ui.提示词.addTextChangedListener(new android.text.TextWatcher({
-    afterTextChanged: function(s) {
-        config.prompt =s
-        sto.put('config',config)
+    afterTextChanged: function (s) {
+        config.prompt = s
+        sto.put(storeKey, config)
     },
-    beforeTextChanged: function(s, start, count, after) {
+    beforeTextChanged: function (s, start, count, after) {
         // 文本变化前的回调
     },
-    onTextChanged: function(s, start, before, count) {
+    onTextChanged: function (s, start, before, count) {
         // 文本正在变化的回调
     }
 }));
@@ -239,8 +256,7 @@ ui.startBtn.on("click", () => {
     config.prompt = $ui.提示词.text();
     config.searchKey = $ui.搜索词.text();
 
-    sto.put('config', config);
-
+    sto.put(storeKey, config);
 
     config.endTime = calculateFutureTime(config.taskRuntime);
     CustomToast.show('脚本结束时间: ' + config.endTime)
@@ -257,7 +273,7 @@ ui.startBtn.on("click", () => {
         console
             .setSize(0.8, 0.3)
             .setPosition(0.02, 0.001)
-            .setTitle('日志(加音量键可开关日志浮窗)')
+            .setTitle('日志')
             .setTitleTextSize(10)
             .setContentTextSize(10)
             .setBackgroundColor('#80000000')
@@ -278,7 +294,7 @@ ui.startBtn.on("click", () => {
         thread = undefined;
         ui.startBtnText.setText('开始');
         console.hide();
-        CustomToast.show("自动程序已关闭",8000);
+        CustomToast.show("自动程序已关闭", 8000);
     }, timeout);
 });
 
@@ -317,24 +333,32 @@ ui.endBtn.on("click", () => {
 ui.rateSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateProgress.setText(`${p}%`);
-        config.commentLikeRate =p
-        sto.put('config',config)
+        config.commentLikeRate = p
+        sto.put(storeKey, config)
     }
 });
 
 ui.rateNoteSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateNoteProgress.setText(`${p}%`);
-        config.commentRate =p
-        sto.put('config',config)
+        config.commentRate = p
+        sto.put(storeKey, config)
     }
 });
 
 ui.rateUserSeekbar.setOnSeekBarChangeListener({
     onProgressChanged: function (seekbar, p, fromUser) {
         ui.rateUserProgress.setText(`${p}%`);
-        config.userCommentLikeRate =p
-        sto.put('config',config)
+        config.userCommentLikeRate = p
+        sto.put(storeKey, config)
+    }
+});
+
+ui.插入群聊概率.setOnSeekBarChangeListener({
+    onProgressChanged: function (seekbar, p, fromUser) {
+        ui.addGroupToCommentRate.setText(`${p}%`);
+        config.addGroupToCommentRate = p
+        sto.put(storeKey, config)
     }
 });
 

@@ -1,3 +1,5 @@
+const utils = require("./common/app-utils");
+
 var count = 100;
 var failCount = 0;
 var rednote = {};
@@ -9,6 +11,8 @@ var config = {
     commentLikeRate: '50',
     // 评论概率
     commentRate: '50',
+    // 插入我加入的群聊
+    addGroupToCommentRate: '50',
     // deepseek ai 评论 key
     dsKey: 'sk-3c15ee56adce455daa553784b251fe4a',
     prompt: '你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版。你的人物设定： 28 岁，女 。',
@@ -72,7 +76,7 @@ function main() {
         }
     } catch (e) {
         console.log("脚本出错：", e, "当前运行错误次数", failCount);
-        if (failCount > 0) {
+        if (failCount >= 0) {
             main();
             failCount++;
         }
@@ -152,12 +156,15 @@ function getTextNoteContent() {
 
 function randomExcute(rate, func, action, param) {
     if (hitProbability(rate, action)) {
-        func(param);
+        var start = new Date().getTime()
+        utils.syncWaitForFunction(func,param, 30000)
+        var end = new Date().getTime()
+        console.log(`${action} 耗时`, `${end - start}ms`)
     }
 }
 
 function doComment(noteObj) {
-    if (!isTextNotePage) {
+    if (!isTextNotePage()) {
         console.log(`不在笔记详情页不评论`, noteObj)
         return
     }
@@ -187,10 +194,34 @@ function doComment(noteObj) {
 
     sleep(getRandomInt(2000, 3000));
 
-    let postView = className("android.widget.ImageView").find();
-    console.log(`找到笔记`, device.width - postView[0].center().x, postView[0].center().y);
-    press(device.width - postView[0].center().x, postView[0].center().y)
+    randomExcute(config.addGroupToCommentRate, addGroupToComment, '插入我加入的群聊')
+
+    console.log('点击发送', className('android.view.View').clickable(true).depth(9).findOne().click())
+
     sleep(getRandomInt(2000, 3000));
+
+}
+
+/**
+ * 评论插入 我进入的群
+ */
+function addGroupToComment() {
+    var comment = className("android.widget.ImageView").indexInParent(3).find();
+    console.log("点击 + 号", comment.click())
+    sleep(3000)
+
+
+    var viewGroup = className("android.widget.TextView").text('群聊').findOne();
+    press(viewGroup.center().x, viewGroup.center().y)
+    sleep(1000)
+
+    var groupChatBtn = className("android.widget.TextView").text('我加入的').findOne();
+    press(groupChatBtn.center().x, groupChatBtn.center().y)
+    sleep(1000)
+
+    var addGroupToChat = className("android.widget.TextView").text('添加').find();
+    var index = getRandomInt(0, addGroupToChat.length - 1);
+    press(addGroupToChat[index].center().x, addGroupToChat[index].center().y)
 }
 
 
@@ -563,7 +594,7 @@ function isMessagePage() {
  * 给笔记点赞
  */
 function doLikeByNote(noteObj) {
-    if (isTextNotePage) {
+    if (isTextNotePage()) {
         if (!noteObj) {
             noteObj = getTextNoteContent();
         }
@@ -587,7 +618,7 @@ function doLikeByUser() {
         filteredNotes = findMostFrequentX(filteredNotes)
         if (filteredNotes.length > 0) {
             const randomIdx = getRandomInt(0, filteredNotes.length - 1);
-            console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
+            // console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
             sleep(getRandomInt(2000, 3000));
             press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y)
         }
@@ -599,7 +630,7 @@ function doLikeByUser() {
  * 找到评论区的点赞按钮
  */
 function findMostFrequentX(filteredNotes) {
-    if (isTextNotePage) {
+    if (isTextNotePage()) {
 
         const xCounts = {};
         const xObjects = {};
