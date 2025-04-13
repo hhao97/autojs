@@ -28,7 +28,7 @@ rednote.run = function (arg) {
     config = arg;
     console.log('参数配置:', config)
     launchApp(config.app);
-    sleep(getRandomInt(5000, 8000));
+    sleep(random(5000, 8000));
     main();
 }
 
@@ -51,7 +51,7 @@ function main() {
 
             if (config.searchKey != '') {
                 const searchKeys = config.searchKey.split('|')
-                doSearch(searchKeys[getRandomInt(0, searchKeys.length - 1)]);
+                doSearch(searchKeys[random(0, searchKeys.length - 1)]);
             }
 
             if (isHomePage()) {
@@ -69,7 +69,7 @@ function main() {
 
             console.log(`找到笔记 ${textNote.length}条`,);
             if (textNote.length > 0) {
-                enterNote(textNote[getRandomInt(0, textNote.length - 1)]);
+                enterNote(textNote[random(0, textNote.length - 1)]);
                 getGoBackByNote();
                 swipeDown();
             }
@@ -90,10 +90,10 @@ function main() {
  */
 function enterNote(textNote) {
     try {
-        sleep(getRandomInt(2000, 3000));
+        sleep(random(2000, 3000));
         console.log(`列表页点击笔记 ${JSON.stringify(textNote)}`);
         press(textNote.center.x, textNote.center.y)
-        sleep(getRandomInt(2000, 3000));
+        sleep(random(2000, 3000));
 
         if (isTextNotePage() && !isVideoNote()) {
             let noteObj = getTextNoteContent();
@@ -128,7 +128,7 @@ function enterNote(textNote) {
  * 获取图文的正文和标题基础信息
  */
 function getTextNoteContent() {
-    sleep(getRandomInt(2000, 3000));
+    sleep(random(2000, 3000));
 
     let noteText = className("android.widget.TextView").find();
     let length = noteText.length;
@@ -186,19 +186,24 @@ function doComment(noteObj) {
     }
 
     press(filteredNotes[0].center().x, filteredNotes[0].center().y)
-    sleep(getRandomInt(2000, 3000));
+    sleep(random(2000, 3000));
 
     let editText = className("android.widget.EditText").find();
     press(editText[0].center().x, editText[0].center().y)
     editText.setText(aiResult)
 
-    sleep(getRandomInt(2000, 3000));
+    sleep(random(2000, 3000));
 
     randomExcute(config.addGroupToCommentRate, addGroupToComment, '插入我加入的群聊')
 
-    console.log('点击发送', className('android.view.View').clickable(true).depth(9).findOne().click())
+    var send = className('android.view.View').clickable(true).depth(9).findOne(5000)
+    if(!send){
+        console.log(`未找到发送按钮`)
+    }
 
-    sleep(getRandomInt(2000, 3000));
+    console.log('点击发送', send.click())
+
+    sleep(random(2000, 3000));
 
 }
 
@@ -211,16 +216,26 @@ function addGroupToComment() {
     sleep(3000)
 
 
-    var viewGroup = className("android.widget.TextView").text('群聊').findOne();
+    var viewGroup = className("android.widget.TextView").text('群聊').findOne(5000);
+    if(!viewGroup){
+        console.log(`未找到群聊按钮`)
+        return
+    }
+
     press(viewGroup.center().x, viewGroup.center().y)
     sleep(1000)
 
-    var groupChatBtn = className("android.widget.TextView").text('我加入的').findOne();
+    var groupChatBtn = className("android.widget.TextView").text('我加入的').findOne(5000);
+    if(!groupChatBtn){
+        console.log(`未找到我加入的群聊按钮`)
+        return
+    }
+    
     press(groupChatBtn.center().x, groupChatBtn.center().y)
     sleep(1000)
 
     var addGroupToChat = className("android.widget.TextView").text('添加').find();
-    var index = getRandomInt(0, addGroupToChat.length - 1);
+    var index = random(0, addGroupToChat.length - 1);
     press(addGroupToChat[index].center().x, addGroupToChat[index].center().y)
 }
 
@@ -231,7 +246,7 @@ function addGroupToComment() {
  * @param {number} max 最大值（包含）
  * @returns {number} 生成的随机整数
  */
-function getRandomInt(min, max) {
+function random(min, max) {
     // 确保输入是有效的数字，并且最小值小于最大值
     if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
         return "输入无效";
@@ -301,7 +316,7 @@ function parseNoteDesc(desc, center) {
  * @returns {boolean} 如果成功执行了返回或关闭操作，则返回 true；否则返回 false。
  */
 function getGoBackByNote() {
-    sleep(getRandomInt(2000, 3000));
+    sleep(random(2000, 3000));
     let filteredNotes = className('android.widget.Button').desc('返回').find();
 
     if (filteredNotes.length == 0) {
@@ -317,8 +332,8 @@ function getGoBackByNote() {
     }
     // 直播间退出
     if (className('android.widget.Button').desc('关闭').find().click()) {
-        sleep(getRandomInt(1000, 2000))
-        className('android.widget.Button').text('退出').findOne().click()
+        sleep(random(1000, 2000))
+        className('android.widget.Button').text('退出').findOnce().click()
     };
 
     console.log(`按下返回按钮`, back())
@@ -331,7 +346,7 @@ function swipeLeft() {
         return
     }
 
-    sleep(getRandomInt(2000, 5000));
+    sleep(random(2000, 5000));
     // 获取屏幕宽度和高度
     let screenWidth = device.width;
     let screenHeight = device.height;
@@ -343,14 +358,14 @@ function swipeLeft() {
     let endY = startY; // 保持 Y 坐标不变，实现水平滑动
 
     // 执行滑动操作
-    swipe(startX, startY, endX, endY, getRandomInt(800, 1000)); // 500 是滑动持续时间，单位为毫秒
+    swipe(startX, startY, endX, endY, random(800, 1000)); // 500 是滑动持续时间，单位为毫秒
 }
 
 function swipeRight() {
     if (!isTextNotePage()) {
         return
     }
-    sleep(getRandomInt(2000, 5000));
+    sleep(random(2000, 5000));
     // 获取屏幕宽度和高度
     let screenWidth = device.width;
     let screenHeight = device.height;
@@ -362,32 +377,15 @@ function swipeRight() {
     let endY = startY; // 保持 Y 坐标不变，实现水平滑动
 
     // 执行滑动操作
-    swipe(startX, startY, endX, endY, getRandomInt(800, 1000)); // 500 是滑动持续时间，单位为毫秒
+    swipe(startX, startY, endX, endY, random(800, 1000)); // 500 是滑动持续时间，单位为毫秒
 }
 
 function swipeDown() {
-    sleep(getRandomInt(2000, 5000));
-    swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), getRandomInt(500, 1000));
+    sleep(random(2000, 5000));
+    swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), random(500, 1000));
 }
 
 
-/**
- *  读取文本中的数字
- * @param {文本} text 
- * @returns 
- */
-function extractNumber(text) {
-    // 使用正则表达式匹配所有数字
-    const matches = text.match(/\d+/g);
-
-    // 如果找到匹配项，则返回第一个匹配项（假设只有一个数字）
-    if (matches && matches.length > 0) {
-        return parseInt(matches[0]);
-    }
-
-    // 如果没有找到匹配项，则返回 null 或 NaN，具体取决于您的需求
-    return null; // 或者 NaN
-}
 
 
 
@@ -598,7 +596,7 @@ function doLikeByNote(noteObj) {
         if (!noteObj) {
             noteObj = getTextNoteContent();
         }
-        sleep(getRandomInt(2000, 3000));
+        sleep(random(2000, 3000));
         press(noteObj.likeCenter.x, noteObj.likeCenter.y)
         console.log(`点赞笔记`, noteObj.likeCenter.x, noteObj.likeCenter.y);
     }
@@ -609,7 +607,7 @@ function doLikeByNote(noteObj) {
  */
 function doLikeByUser() {
     if (isTextNotePage()) {
-        sleep(getRandomInt(2000, 3000));
+        sleep(random(2000, 3000));
         const likeView = className("android.widget.ImageView").find();
 
         filteredNotes = likeView.filter(function (note) {
@@ -617,9 +615,9 @@ function doLikeByUser() {
         });
         filteredNotes = findMostFrequentX(filteredNotes)
         if (filteredNotes.length > 0) {
-            const randomIdx = getRandomInt(0, filteredNotes.length - 1);
+            const randomIdx = random(0, filteredNotes.length - 1);
             // console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
-            sleep(getRandomInt(2000, 3000));
+            sleep(random(2000, 3000));
             press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y)
         }
     }
@@ -690,7 +688,7 @@ function doSearch(serachKey) {
 
         press(searchBtn[0].center().x, searchBtn[0].center().y)
         console.log(`点击搜索按钮`);
-        sleep(getRandomInt(3000, 5000));
+        sleep(random(3000, 5000));
 
         const searchInput = className("android.widget.EditText").find();
         searchInput = searchInput.filter(function (note) {
@@ -698,7 +696,7 @@ function doSearch(serachKey) {
         });
         searchInput[0].setText(serachKey);
         console.log(`设置搜索内容：${serachKey}`);
-        sleep(getRandomInt(3000, 5000));
+        sleep(random(3000, 5000));
 
         const doSearchBtn = className("android.widget.Button").find();
 
@@ -709,7 +707,7 @@ function doSearch(serachKey) {
         press(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y);
         console.log(`点击搜索按钮`);
 
-        sleep(getRandomInt(3000, 5000));
+        sleep(random(3000, 5000));
     }
 }
 
@@ -749,7 +747,7 @@ function isLiveRoom() {
 // isVideoNote();
 
 // launchApp('小红书');
-// sleep(getRandomInt(5000, 8000));
+// sleep(random(5000, 8000));
 // main();
 // isMessagePage();
 
