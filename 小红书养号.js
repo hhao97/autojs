@@ -1,5 +1,5 @@
 const utils = require("./common/app-utils");
-
+const CustomToast = require("./common/custom-toast.js");
 var count = 100;
 var failCount = 0;
 var rednote = {};
@@ -40,7 +40,7 @@ function main() {
                 break;
             }
 
-            console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
+            CustomToast.show(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
 
             // 下滑操作
             for (let i = 0; i < 5; i++) {
@@ -92,7 +92,7 @@ function enterNote(textNote) {
     try {
         sleep(random(2000, 3000));
         console.log(`列表页点击笔记 ${JSON.stringify(textNote)}`);
-        press(textNote.center.x, textNote.center.y)
+        click(textNote.center.x, textNote.center.y)
         sleep(random(2000, 3000));
 
         if (isTextNotePage() && !isVideoNote()) {
@@ -157,7 +157,8 @@ function getTextNoteContent() {
 function randomExcute(rate, func, action, param) {
     if (hitProbability(rate, action)) {
         var start = new Date().getTime()
-        utils.syncWaitForFunction(func,param, 30000)
+        func(param)
+        // utils.syncWaitForFunction(func,param, 30000)
         var end = new Date().getTime()
         console.log(`${action} 耗时`, `${end - start}ms`)
     }
@@ -185,11 +186,11 @@ function doComment(noteObj) {
         return
     }
 
-    press(filteredNotes[0].center().x, filteredNotes[0].center().y)
+    click(filteredNotes[0].center().x, filteredNotes[0].center().y)
     sleep(random(2000, 3000));
 
     let editText = className("android.widget.EditText").find();
-    press(editText[0].center().x, editText[0].center().y)
+    click(editText[0].center().x, editText[0].center().y)
     editText.setText(aiResult)
 
     sleep(random(2000, 3000));
@@ -222,7 +223,7 @@ function addGroupToComment() {
         return
     }
 
-    press(viewGroup.center().x, viewGroup.center().y)
+    click(viewGroup.center().x, viewGroup.center().y)
     sleep(1000)
 
     var groupChatBtn = className("android.widget.TextView").text('我加入的').findOne(5000);
@@ -230,40 +231,16 @@ function addGroupToComment() {
         console.log(`未找到我加入的群聊按钮`)
         return
     }
-    
-    press(groupChatBtn.center().x, groupChatBtn.center().y)
+
+    click(groupChatBtn.center().x, groupChatBtn.center().y)
     sleep(1000)
 
     var addGroupToChat = className("android.widget.TextView").text('添加').find();
     var index = random(0, addGroupToChat.length - 1);
-    press(addGroupToChat[index].center().x, addGroupToChat[index].center().y)
+    click(addGroupToChat[index].center().x, addGroupToChat[index].center().y)
 }
 
 
-/**
- * 生成指定范围内的随机整数
- * @param {number} min 最小值（包含）
- * @param {number} max 最大值（包含）
- * @returns {number} 生成的随机整数
- */
-function random(min, max) {
-    // 确保输入是有效的数字，并且最小值小于最大值
-    if (typeof min !== 'number' || typeof max !== 'number' || min > max) {
-        return "输入无效";
-    } else if (min == max) {
-        return min;
-    }
-
-    // 确保最小值和最大值都是整数
-    const roundedMin = Math.ceil(min);
-    const roundedMax = Math.floor(max);
-
-    // 生成随机整数
-    const randomNumber = Math.floor(Math.random() * (roundedMax - roundedMin + 1)) + roundedMin;
-    const result = Math.max(1, randomNumber);
-    // 确保随机数是正数
-    return result;
-}
 
 
 /**
@@ -346,7 +323,7 @@ function swipeLeft() {
         return
     }
 
-    sleep(random(2000, 5000));
+    sleep(random(2000, 3000));
     // 获取屏幕宽度和高度
     let screenWidth = device.width;
     let screenHeight = device.height;
@@ -365,7 +342,7 @@ function swipeRight() {
     if (!isTextNotePage()) {
         return
     }
-    sleep(random(2000, 5000));
+    sleep(random(2000, 3000));
     // 获取屏幕宽度和高度
     let screenWidth = device.width;
     let screenHeight = device.height;
@@ -381,7 +358,7 @@ function swipeRight() {
 }
 
 function swipeDown() {
-    sleep(random(2000, 5000));
+    sleep(random(2000, 3000));
     swipe(device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.7, 0.9), device.width / getRandomFloat(1, 4), device.height * getRandomFloat(0.1, 0.3), random(500, 1000));
 }
 
@@ -421,7 +398,7 @@ function callDeepSeek(content) {
     // 定义请求选项
     var options = {
         headers: headers,
-        timeout: 20000 // 可选：设置超时时间(毫秒)
+        timeout: 30000 // 可选：设置超时时间(毫秒)
     };
 
     r = http.postJson(url, {
@@ -597,7 +574,7 @@ function doLikeByNote(noteObj) {
             noteObj = getTextNoteContent();
         }
         sleep(random(2000, 3000));
-        press(noteObj.likeCenter.x, noteObj.likeCenter.y)
+        click(noteObj.likeCenter.x, noteObj.likeCenter.y)
         console.log(`点赞笔记`, noteObj.likeCenter.x, noteObj.likeCenter.y);
     }
 }
@@ -618,7 +595,7 @@ function doLikeByUser() {
             const randomIdx = random(0, filteredNotes.length - 1);
             // console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
             sleep(random(2000, 3000));
-            press(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y)
+            click(filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y)
         }
     }
 }
@@ -686,7 +663,7 @@ function doSearch(serachKey) {
             console.log('搜索按钮未找到')
         }
 
-        press(searchBtn[0].center().x, searchBtn[0].center().y)
+        click(searchBtn[0].center().x, searchBtn[0].center().y)
         console.log(`点击搜索按钮`);
         sleep(random(3000, 5000));
 
@@ -704,7 +681,7 @@ function doSearch(serachKey) {
             return note.text() && note.text() == "搜索";
         });
 
-        press(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y);
+        click(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y);
         console.log(`点击搜索按钮`);
 
         sleep(random(3000, 5000));
