@@ -294,6 +294,7 @@ ui.startBtn.on("click", () => {
         thread = undefined;
         ui.startBtnText.setText('开始');
         console.hide();
+        console.log("自动程序已关闭", 8000);
         CustomToast.show("自动程序已关闭", 8000);
     }, timeout);
 });
