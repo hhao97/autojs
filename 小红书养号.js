@@ -1,5 +1,4 @@
 const utils = require("./common/app-utils");
-const CustomToast = require("./common/custom-toast.js");
 var count = 100;
 var failCount = 0;
 var rednote = {};
@@ -40,7 +39,7 @@ function main() {
                 break;
             }
 
-            CustomToast.show(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
+            console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
 
             // 下滑操作
             for (let i = 0; i < 5; i++) {
