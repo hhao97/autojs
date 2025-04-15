@@ -203,22 +203,21 @@ function doComment(noteObj) {
 }
 function doSend() {
     sleep(random(2000, 3000));
-    // var sendBtn = className("android.widget.TextView").text("发送").findOne(5000);
-    // if (sendBtn) {
-    //     console.log(sendBtn.center())
-    //     click(random(sendBtn.center().x - 20, sendBtn.center().x + 20),
-    //         random(sendBtn.center().y - 20, sendBtn.center().y + 20))
-    //     return;
-    // } 
+
     var 发送 = images.read("images/小红-评论-发送.jpg");
     var p = findImage(captureScreen(), 发送);
-    if(p){
-        toast("在桌面找到了微信图标啦: " + p);
-        click(p.x,p.y)
-    }else{
-        toast("在桌面没有找到微信图标");
+    if (p) {
+        click(p.x, p.y)
+    } else {
+        console.log("截图识图-没有找到发送按钮")
     }
-    
+
+    var sendBtn = className("android.widget.TextView").text("发送").findOne(5000);
+    if (sendBtn) {
+        console.log(sendBtn.center())
+        console.log("文本识别-点击发送按钮", click(random(sendBtn.center().x - 20, sendBtn.center().x + 20),
+            random(sendBtn.center().y - 20, sendBtn.center().y + 20)))
+    }
 }
 
 /**
@@ -231,7 +230,7 @@ function addGroupToComment() {
 
 
     var viewGroup = className("android.widget.TextView").text('群聊').findOne(5000);
-    if(!viewGroup){
+    if (!viewGroup) {
         console.log(`未找到群聊按钮`)
         return
     }
@@ -240,7 +239,7 @@ function addGroupToComment() {
     sleep(1000)
 
     var groupChatBtn = className("android.widget.TextView").text('我加入的').findOne(5000);
-    if(!groupChatBtn){
+    if (!groupChatBtn) {
         console.log(`未找到我加入的群聊按钮`)
         return
     }
