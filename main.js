@@ -25,7 +25,7 @@ if (!config) {
         searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
         endTime: ''
     }
-} 
+}
 
 
 var color = "#02685B";
@@ -283,6 +283,14 @@ ui.startBtn.on("click", () => {
             .setTouchable(false)
             .show();
 
+       
+        if (!requestScreenCapture()) {
+            CustomToast.show("请求截图失败,请点允许");
+            return;
+        }
+
+        sleep(getRandom(2000,5000))
+        
         rednote.run(config);
     });
 
@@ -400,59 +408,6 @@ let menuItems = [
     { title: "日志窗口", id: '日志窗口', checked: console.isShowing(), icon: "@drawable/ic_android_black_48dp" },
 ];
 
-
-// $ui.post(() => {
-//     ui.无障碍服务.on("check", function (checked) {
-//         // 用户勾选无障碍服务的选项时，跳转到页面让用户去开启
-//         if (checked && auto.service == null) {
-//             app.startActivity({
-//                 action: "android.settings.ACCESSIBILITY_SETTINGS"
-//             });
-//             CustomToast.show("请开启无障碍服务");
-//         }
-//         if (!checked && auto.service != null) {
-//             auto.service.disableSelf();
-//         }
-//     });
-
-//     ui.日志窗口.on("check", function (checked) {
-//         if (checked) {
-//             console
-//                 .setSize(0.8, 0.3)
-//                 .setPosition(0.02, 0.001)
-//                 .setTitle('日志(加音量键可开关日志浮窗)')
-//                 .setTitleTextSize(10)
-//                 .setContentTextSize(10)
-//                 .setBackgroundColor('#80000000')
-//                 .setTitleBackgroundAlpha(0.8)
-//                 .setContentBackgroundAlpha(0.5)
-//                 .setExitOnClose(6e3)
-//                 .setTouchable(false)
-//                 .show();
-//         } else {
-//             console.hide();
-//         }
-//     });
-
-//     ui.emitter.on("resume", function () {
-//         ui.无障碍服务.checked = auto.service != null;
-//         ui.日志窗口.checked = console.isShowing()
-//     });
-// }, 1000);
-
-// console.log(`无障碍服务`, auto.service != null)
-// events.observeKey();
-// events.setTouchEventTimeout(3000)
-
-
-
-// events.on('volume_down', () => {
-//     console.hide();
-//     if (thread && thread.isAlive()) {
-//         thread.interrupt()
-//     }
-//     exit();
-// });
 
 
 ui.menu.setDataSource(menuItems.map(item => {

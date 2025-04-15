@@ -196,15 +196,29 @@ function doComment(noteObj) {
 
     randomExcute(config.addGroupToCommentRate, addGroupToComment, '插入我加入的群聊')
 
-    var send = className('android.view.View').clickable(true).depth(9).findOne(5000)
-    if(!send){
-        console.log(`未找到发送按钮`)
-    }
-
-    console.log('点击发送', send.click())
+    doSend()
 
     sleep(random(2000, 3000));
 
+}
+function doSend() {
+    sleep(random(2000, 3000));
+    // var sendBtn = className("android.widget.TextView").text("发送").findOne(5000);
+    // if (sendBtn) {
+    //     console.log(sendBtn.center())
+    //     click(random(sendBtn.center().x - 20, sendBtn.center().x + 20),
+    //         random(sendBtn.center().y - 20, sendBtn.center().y + 20))
+    //     return;
+    // } 
+    var 发送 = images.read("images/小红-评论-发送.jpg");
+    var p = findImage(captureScreen(), 发送);
+    if(p){
+        toast("在桌面找到了微信图标啦: " + p);
+        click(p.x,p.y)
+    }else{
+        toast("在桌面没有找到微信图标");
+    }
+    
 }
 
 /**
