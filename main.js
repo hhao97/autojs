@@ -288,8 +288,6 @@ ui.startBtn.on("click", () => {
             CustomToast.show("请求截图失败,请点允许");
             return;
         }
-
-        sleep(getRandom(2000,5000))
         
         rednote.run(config);
     });
