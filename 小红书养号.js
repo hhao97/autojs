@@ -207,14 +207,14 @@ function doSend() {
     var 发送 = images.read("images/小红-评论-发送.jpg");
     var p = findImage(captureScreen(), 发送);
     if (p) {
-        click(p.x, p.y)
+        console.log("图片识别-点击发送按钮", click(p.x, p.y))
+        return
     } else {
         console.log("截图识图-没有找到发送按钮")
     }
 
     var sendBtn = className("android.widget.TextView").text("发送").findOne(5000);
     if (sendBtn) {
-        console.log(sendBtn.center())
         console.log("文本识别-点击发送按钮", click(random(sendBtn.center().x - 20, sendBtn.center().x + 20),
             random(sendBtn.center().y - 20, sendBtn.center().y + 20)))
     }
