@@ -65,7 +65,6 @@ function main() {
 }
 
 
-
 /**
  * 进入图文笔记
  */
@@ -136,12 +135,11 @@ function getTextNoteContent() {
 }
 
 function randomExcute(rate, func, action, param) {
-    if (hitProbability(rate, action)) {
+    if (hitProbability(rate)) {
         var start = new Date().getTime()
         func(param)
-        // utils.syncWaitForFunction(func,param, 30000)
         var end = new Date().getTime()
-        console.log(`${action} 耗时`, `${end - start}ms`)
+        console.log(`随机动作-${action} 执行-` + `${action} 耗时`, `${end - start}ms`)
     }
 }
 
@@ -371,7 +369,7 @@ function swipeDown() {
 
 
 
-function hitProbability(probability, action) {
+function hitProbability(probability) {
 
     // 处理边界情况
     if (probability === 0) return false;
@@ -383,9 +381,6 @@ function hitProbability(probability, action) {
     let flag = false;
     // 检查是否命中
     flag = randomValue < probability
-    if (flag) {
-        console.log(`随机动作-${action} 执行 `);
-    }
 
     return flag;
 }

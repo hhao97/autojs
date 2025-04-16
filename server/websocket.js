@@ -1,15 +1,17 @@
 var websocket = {};
 var ws = null;
 
-// /* 发送文本消息. */
-// setInterval(() => {
-//     ws.send(`{"text":"Hello WebSocket"}`);
-// }, 1000);
 
+var uuid = device.fingerprint;
+function md5(string){
+	var res=java.math.BigInteger(1,java.security.MessageDigest.getInstance("MD5").digest(java.lang.String(string).getBytes())).toString(16);
+	while(res.length<32)res="0"+res;
+	return res;
+}
 
 websocket.init = function () {
     if (!ws) {
-        ws = new WebSocket('ws://192.168.1.210:8111/websocket/122323');
+        ws = new WebSocket(`wss://qevlmydabayn.sealosgzg.site/websocket/${md5(uuid)}`);
         ws
             .on(WebSocket.EVENT_OPEN, (res, ws) => {
                 console.log('WebSocket 已连接');
@@ -30,7 +32,7 @@ websocket.init = function () {
             .on(WebSocket.EVENT_BYTES, (bytes, ws) => {
             })
             .on(WebSocket.EVENT_CLOSING, (code, reason, ws) => {
-                console.log('WebSocket 关闭中');
+                console.log('WebSocket 关闭中',code,reason);
             })
             .on(WebSocket.EVENT_CLOSED, (code, reason, ws) => {
                 console.log('WebSocket 已关闭');
@@ -46,6 +48,9 @@ websocket.init = function () {
 }
 
 websocket.getInstance = function () {
+    if (!ws) {
+        websocket.init();
+    }
     return ws;
 };
 
