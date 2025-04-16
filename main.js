@@ -23,9 +23,15 @@ if (!config) {
         // 脚本允许时长(分钟)
         taskRuntime: '10',
         searchKey: '省钱|好物|母婴|生娃|育儿|怀孕',
-        endTime: ''
+        endTime: '',
+        groupLink: ``
     }
 }
+//// 增量命令
+if (!config.groupLink) {
+    config.groupLink = `2【长按复制这条邀请码信息打开小红书即可加入该群】 5月14日前可加入群聊"省钱助手" CA4311 :/#w😆😳🍉😛🦊🍆🥮🍗🥯🐧😛🥮`
+}
+///
 
 
 var color = "#02685B";
@@ -148,12 +154,25 @@ ui.layout(
 
                                     <vertical padding='10 0' gravity='center_vertical'>
                                         <horizontal>
-                                            <text text="插入群聊(触发评论后)" textSize="14sp" textColor='#333' />
+                                            <text text="插入群聊(评论后)" textSize="14sp" textColor='#333' />
                                             <text layout_weight='1'></text>
                                             <text text="{{config.addGroupToCommentRate}}%" id='addGroupToCommentRate'></text>
                                         </horizontal>
                                         <seekbar id='插入群聊概率' max='100' progress='{{config.addGroupToCommentRate}}' color='{{color}}' />
                                     </vertical>
+
+                                    <horizontal padding='8 0 ' marginTop='5' marginBottom='5'>
+                                        <frame w="*" h="1" bg='#eee' gravity="center"  ></frame>
+                                    </horizontal>
+
+                                    <vertical padding='10 0' gravity='center_vertical'>
+                                        <horizontal>
+                                            <text text="群口令" textSize="14sp" textColor='#333' />
+                                            <text layout_weight='1'></text>
+                                        </horizontal>
+                                        <input id='群口令' text='{{config.groupLink}}' singleLine="false" textSize='14sp' textColor='#333' />
+                                    </vertical>
+
 
                                 </vertical>
                             </card>
@@ -283,12 +302,12 @@ ui.startBtn.on("click", () => {
             .setTouchable(false)
             .show();
 
-       
+
         if (!requestScreenCapture()) {
             CustomToast.show("请求截图失败,请点允许");
             return;
         }
-        
+
         rednote.run(config);
     });
 
