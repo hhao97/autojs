@@ -250,6 +250,19 @@ ui.搜索词.addTextChangedListener(new android.text.TextWatcher({
     }
 }));
 
+ui.群口令.addTextChangedListener(new android.text.TextWatcher({
+    afterTextChanged: function (s) {
+        config.groupLink = s
+        sto.put(storeKey, config)
+    },
+    beforeTextChanged: function (s, start, count, after) {
+        // 文本变化前的回调
+    },
+    onTextChanged: function (s, start, before, count) {
+        // 文本正在变化的回调
+    }
+}));
+
 ui.提示词.addTextChangedListener(new android.text.TextWatcher({
     afterTextChanged: function (s) {
         config.prompt = s
