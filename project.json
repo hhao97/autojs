@@ -9,6 +9,7 @@
       "android.permission.INTERNET",
       "android.permission.SYSTEM_ALERT_WINDOW"
     ],
+    "splashText": "欢迎使用我的应用",
     "libs": [],
     "main": "main.js",
     "name": "私域助手",

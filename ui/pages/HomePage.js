@@ -7,15 +7,11 @@ module.exports = function HomePage(config, onConfigChange) {
     const layout = `
         <frame bg="${global.theme.colors.background}">
             <ScrollView>
+            
                 <vertical paddingBottom="30">
-                    ${Card("应用选择", `
-                        <horizontal padding="10 5" gravity="center_vertical">
-                            <text text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                            <text text="" layout_weight="1" />
-                            <radio checked="true" tint="${global.theme.colors.primary}" />
-                        </horizontal>
-                    `)}
-
+                    <horizontal gravity="center" bg="${global.theme.colors.white}" elevation="2dp">
+                    <text id="stats_tab1" text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.primary}" padding="16 8" />
+                </horizontal>
                     ${Card("基本参数", `
                         <vertical>
                             <horizontal padding="10 0" gravity="center_vertical">
@@ -289,6 +285,20 @@ module.exports = function HomePage(config, onConfigChange) {
                     thread.interrupt();
                     thread = undefined;
                 }
+            });
+
+            // 搜索框点击事件
+            ui.搜索词.on("click", () => {
+                // 显示键盘
+                ui.搜索词.focus();
+                // 隐藏底部导航栏
+                ui.导航栏.attr("visibility", "gone");
+            });
+
+            // 搜索框失去焦点事件
+            ui.搜索词.on("blur", () => {
+                // 显示底部导航栏
+                ui.导航栏.attr("visibility", "visible");
             });
         }
     };
