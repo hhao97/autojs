@@ -5,32 +5,134 @@ const thread = undefined;
 module.exports = function HomePage(config, onConfigChange) {
     // 创建UI布局
     const layout = `
-        <vertical padding="16">
-            <horizontal gravity="center" marginBottom="16">
-                <text id="tab1" text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.primary}" padding="8" />
-                <text id="tab2" text="抖音" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.secondary}" padding="8" />
-                <text id="tab3" text="快手" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.secondary}" padding="8" />
-                <text id="tab4" text="微信" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.secondary}" padding="8" />
-            </horizontal>
-            <frame id="content" layout_weight="1">
-                <vertical id="page1">
-                    <text text="小红书内容" textSize="${global.theme.text.size.large}" textColor="${global.theme.colors.text.primary}" />
-                    <!-- 其他小红书相关的内容 -->
+        <frame bg="${global.theme.colors.background}">
+            <ScrollView>
+                <vertical paddingBottom="30">
+                    ${Card("应用选择", `
+                        <horizontal padding="10 5" gravity="center_vertical">
+                            <text text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            <text text="" layout_weight="1" />
+                            <radio checked="true" tint="${global.theme.colors.primary}" />
+                        </horizontal>
+                    `)}
+
+                    ${Card("基本参数", `
+                        <vertical>
+                            <horizontal padding="10 0" gravity="center_vertical">
+                                <text text="运行时长" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <text text="" layout_weight="1" />
+                                <horizontal>
+                                    <input id="运行时长" text="${config.taskRuntime}" inputType="number" textSize="${global.theme.text.size.normal}" />
+                                    <text text="分钟" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                </horizontal>
+                            </horizontal>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <text text="DeepSeek AI 评论 KEY" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="dsKey" text="${config.dsKey}" singleLine="true" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <text text="DeepSeek 提示词" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="提示词" text="${config.prompt}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <text text="搜索词(多个使用英文|分割，随机取值)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="搜索词" text="${config.searchKey}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+                        </vertical>
+                    `)}
+
+                    ${Card("概率设置", `
+                        <vertical>
+                            <vertical padding="10 0" gravity="center_vertical" marginTop="10">
+                                <horizontal>
+                                    <text text="作品点赞概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                    <text layout_weight="1"></text>
+                                    <text text="${config.commentRate}%" id="rateProgress"></text>
+                                </horizontal>
+                                <seekbar id="rateSeekbar" max="100" progress="${config.commentRate}" color="${global.theme.colors.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <horizontal>
+                                    <text text="评论点赞概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                    <text layout_weight="1"></text>
+                                    <text text="${config.commentLikeRate}%" id="rateUserProgress"></text>
+                                </horizontal>
+                                <seekbar id="rateUserSeekbar" max="100" progress="${config.userCommentLikeRate}" color="${global.theme.colors.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <horizontal>
+                                    <text text="作品评论概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                    <text layout_weight="1"></text>
+                                    <text text="${config.commentRate}%" id="rateNoteProgress"></text>
+                                </horizontal>
+                                <seekbar id="rateNoteSeekbar" max="100" progress="${config.commentRate}" color="${global.theme.colors.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <horizontal>
+                                    <text text="插入群聊(评论后)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                    <text layout_weight="1"></text>
+                                    <text text="${config.addGroupToCommentRate}%" id="addGroupToCommentRate"></text>
+                                </horizontal>
+                                <seekbar id="插入群聊概率" max="100" progress="${config.addGroupToCommentRate}" color="${global.theme.colors.primary}" />
+                            </vertical>
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <horizontal>
+                                    <text text="群口令" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                    <text layout_weight="1"></text>
+                                </horizontal>
+                                <input id="群口令" hint="请输入群口令" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+                        </vertical>
+                    `)}
+
+                    <vertical>
+                        <frame id="startBtn" w="*" margin="16" gravity="center">
+                            <text padding="20 10" id="startBtnText" text="开始" gravity="center" textColor="${global.theme.colors.text.white}" textSize="${global.theme.text.size.large}" />
+                        </frame>
+                    </vertical>
+                    <vertical>
+                        <frame id="endBtn" w="*" margin="16 8" gravity="center">
+                            <text padding="20 10" text="结束" gravity="center" textColor="${global.theme.colors.text.white}" textSize="${global.theme.text.size.large}" />
+                        </frame>
+                    </vertical>
                 </vertical>
-                <vertical id="page2" visibility="gone">
-                    <text text="抖音内容" textSize="${global.theme.text.size.large}" textColor="${global.theme.colors.text.primary}" />
-                    <!-- 其他抖音相关的内容 -->
-                </vertical>
-                <vertical id="page3" visibility="gone">
-                    <text text="快手内容" textSize="${global.theme.text.size.large}" textColor="${global.theme.colors.text.primary}" />
-                    <!-- 其他快手相关的内容 -->
-                </vertical>
-                <vertical id="page4" visibility="gone">
-                    <text text="微信内容" textSize="${global.theme.text.size.large}" textColor="${global.theme.colors.text.primary}" />
-                    <!-- 其他微信相关的内容 -->
-                </vertical>
-            </frame>
-        </vertical>
+            </ScrollView>
+        </frame>
     `;
 
     // 返回布局和事件处理函数
@@ -188,50 +290,6 @@ module.exports = function HomePage(config, onConfigChange) {
                     thread = undefined;
                 }
             });
-
-            // 设置标签页点击事件
-            ui.tab1.on("click", () => {
-                updateTabs(0);
-                showPage(0);
-            });
-
-            ui.tab2.on("click", () => {
-                updateTabs(1);
-                showPage(1);
-            });
-
-            ui.tab3.on("click", () => {
-                updateTabs(2);
-                showPage(2);
-            });
-
-            ui.tab4.on("click", () => {
-                updateTabs(3);
-                showPage(3);
-            });
-
-            // 更新标签页颜色
-            function updateTabs(activeTab) {
-                const tabs = [ui.tab1, ui.tab2, ui.tab3, ui.tab4];
-                const activeColor = global.theme.colors.primary;
-                const inactiveColor = global.theme.colors.text.secondary;
-
-                tabs.forEach((tab, index) => {
-                    tab.attr("textColor", index === activeTab ? activeColor : inactiveColor);
-                });
-            }
-
-            // 显示对应的页面
-            function showPage(index) {
-                const pages = [ui.page1, ui.page2, ui.page3, ui.page4];
-                pages.forEach((page, i) => {
-                    page.attr("visibility", i === index ? "visible" : "gone");
-                });
-            }
-
-            // 初始化显示第一个页面
-            updateTabs(0);
-            showPage(0);
         }
     };
 }; 
