@@ -1,7 +1,7 @@
 const Card = require('../components/Card');
 const UtilTime = require('../utils/time')
 
-const thread =undefined;
+const thread = undefined;
 module.exports = function HomePage(config, onConfigChange) {
     // 创建UI布局
     const layout = `
@@ -138,7 +138,19 @@ module.exports = function HomePage(config, onConfigChange) {
     // 返回布局和事件处理函数
     return {
         layout: layout,
-        setupEvents: function(ui, configManager) {
+        setupEvents: function (ui, configManager) {
+            // 设置按钮样式
+            let gradientDrawable = new android.graphics.drawable.GradientDrawable();
+            gradientDrawable.setColor(android.graphics.Color.parseColor(theme.colors.primary));
+            gradientDrawable.setCornerRadius(25);
+
+            let gradientDrawableRed = new android.graphics.drawable.GradientDrawable();
+            gradientDrawableRed.setColor(android.graphics.Color.parseColor(theme.colors.secondary));
+            gradientDrawableRed.setCornerRadius(25);
+
+            ui.startBtn.setBackground(gradientDrawable);
+            ui.endBtn.setBackground(gradientDrawableRed);
+
             // 设置群口令的值
             ui.post(() => {
                 ui.群口令.setText(config.groupLink);
@@ -146,43 +158,43 @@ module.exports = function HomePage(config, onConfigChange) {
 
             // 搜索词输入监听
             ui.搜索词.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function(s) {
+                afterTextChanged: function (s) {
                     config.searchKey = s;
                     configManager.update(config);
                 },
-                beforeTextChanged: function(s, start, count, after) {},
-                onTextChanged: function(s, start, before, count) {}
+                beforeTextChanged: function (s, start, count, after) { },
+                onTextChanged: function (s, start, before, count) { }
             }));
 
             // 群口令输入监听
             ui.群口令.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function(s) {
+                afterTextChanged: function (s) {
                     config.groupLink = s;
                     configManager.update(config);
                 },
-                beforeTextChanged: function(s, start, count, after) {},
-                onTextChanged: function(s, start, before, count) {}
+                beforeTextChanged: function (s, start, count, after) { },
+                onTextChanged: function (s, start, before, count) { }
             }));
 
             // 提示词输入监听
             ui.提示词.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function(s) {
+                afterTextChanged: function (s) {
                     config.prompt = s;
                     configManager.update(config);
                 },
-                beforeTextChanged: function(s, start, count, after) {},
-                onTextChanged: function(s, start, before, count) {}
+                beforeTextChanged: function (s, start, count, after) { },
+                onTextChanged: function (s, start, before, count) { }
             }));
 
             // 运行时长输入监听
-            ui.运行时长.on("textChanged", function(text) {
+            ui.运行时长.on("textChanged", function (text) {
                 config.taskRuntime = text;
                 configManager.update(config);
             });
 
             // 概率设置监听
             ui.rateSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function(seekbar, p, fromUser) {
+                onProgressChanged: function (seekbar, p, fromUser) {
                     ui.rateProgress.setText(`${p}%`);
                     config.commentLikeRate = p;
                     configManager.update(config);
@@ -190,7 +202,7 @@ module.exports = function HomePage(config, onConfigChange) {
             });
 
             ui.rateNoteSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function(seekbar, p, fromUser) {
+                onProgressChanged: function (seekbar, p, fromUser) {
                     ui.rateNoteProgress.setText(`${p}%`);
                     config.commentRate = p;
                     configManager.update(config);
@@ -198,7 +210,7 @@ module.exports = function HomePage(config, onConfigChange) {
             });
 
             ui.rateUserSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function(seekbar, p, fromUser) {
+                onProgressChanged: function (seekbar, p, fromUser) {
                     ui.rateUserProgress.setText(`${p}%`);
                     config.userCommentLikeRate = p;
                     configManager.update(config);
@@ -206,7 +218,7 @@ module.exports = function HomePage(config, onConfigChange) {
             });
 
             ui.插入群聊概率.setOnSeekBarChangeListener({
-                onProgressChanged: function(seekbar, p, fromUser) {
+                onProgressChanged: function (seekbar, p, fromUser) {
                     ui.addGroupToCommentRate.setText(`${p}%`);
                     config.addGroupToCommentRate = p;
                     configManager.update(config);
@@ -230,7 +242,7 @@ module.exports = function HomePage(config, onConfigChange) {
 
                 console.log(`脚本执行时间 ${config.taskRuntime} 分`);
                 ui.startBtnText.setText('执行中...');
-                thread = threads.start(function() {
+                thread = threads.start(function () {
                     //程序开始运行之前判断无障碍服务
                     if (auto.service == null) {
                         CustomToast.show("请先开启无障碍服务！");
