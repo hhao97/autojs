@@ -1,5 +1,6 @@
 const Card = require('../components/Card');
 const UtilTime = require('../utils/time')
+importClass(android.content.Context);
 
 const thread = undefined;
 module.exports = function HomePage(config, onConfigChange) {
@@ -12,6 +13,18 @@ module.exports = function HomePage(config, onConfigChange) {
                     <horizontal gravity="center" bg="${global.theme.colors.white}" elevation="2dp">
                     <text id="stats_tab1" text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.primary}" padding="16 8" />
                 </horizontal>
+
+                
+                    ${Card("权限设置", `
+                           <vertical>
+                        <Switch margin="10 0" id="autoService" text="无障碍服务" checked="{{auto.service !=null}} "/ >
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+                            <Switch margin="10 0" id="悬浮窗" text="悬浮窗口" checked="{{1}} "/ >
+                        </vertical>
+                        `)}
+                    
                     ${Card("基本参数", `
                         <vertical>
                             <horizontal padding="10 0" gravity="center_vertical">
@@ -134,7 +147,10 @@ module.exports = function HomePage(config, onConfigChange) {
     // 返回布局和事件处理函数
     return {
         layout: layout,
-        setupEvents: function (ui, configManager) {
+        setupEvents: function (ui, configManager, customToast) {
+
+
+
             // 设置按钮样式
             let gradientDrawable = new android.graphics.drawable.GradientDrawable();
             gradientDrawable.setColor(android.graphics.Color.parseColor(theme.colors.primary));
@@ -220,6 +236,37 @@ module.exports = function HomePage(config, onConfigChange) {
                     configManager.update(config);
                 }
             });
+
+            //开启无障碍服务
+            ui.autoService.on("check", function (checked) {
+                if (checked && auto.service == null) {
+                    app.startActivity({
+                        action: "android.settings.ACCESSIBILITY_SETTINGS"
+                    });
+                }
+                if (!checked && auto.service != null) {
+                    auto.service.disableSelf();
+                }
+            });
+
+            ui.悬浮窗.on("check", function (checked) {
+                if (!checked) {
+                    customToast.show("悬浮窗口权限必须开启")
+                    app.startActivity({
+                        packageName: "com.android.settings",
+                        className: "com.android.settings.Settings$AppDrawOverlaySettingsActivity",
+                        data: "package:" + context.getPackageName().toString()
+                    });
+                }
+            })
+
+
+            if (android.provider.Settings.canDrawOverlays(context)) {
+                ui.悬浮窗.setChecked(true);
+            } else {
+                ui.悬浮窗.setChecked(false);
+            }
+
 
             // 开始按钮点击事件
             ui.startBtn.on("click", () => {

@@ -7,11 +7,11 @@ module.exports = function NavigationBar() {
             </vertical>
             <vertical id="tab2" layout_weight="1" gravity="center" padding="8" w="*" >
                 <img w="24" h="24" src="@drawable/ic_android_black_48dp" tint="${global.theme.colors.text.secondary}" />
-                <text text="统计" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
+                <text text="开发中" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
             </vertical>
             <vertical id="tab3" layout_weight="1" gravity="center" padding="8" w="*" >
                 <img w="24" h="24" src="@drawable/ic_android_black_48dp" tint="${global.theme.colors.text.secondary}" />
-                <text text="我的" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
+                <text text="开发中" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
             </vertical>
         </horizontal>
     `;

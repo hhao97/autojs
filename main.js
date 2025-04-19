@@ -26,6 +26,45 @@ const statisticsPage = StatisticsPage(config, function (newConfig) {
     config = configManager.update(newConfig);
 });
 
+
+var CurrentVersion = 1.0
+var url = "https://share.weiyun.com/K5FzyWiW"
+r = http.get(url);
+var html = r.body.string();
+var moid = html.split('shareInfo":')[1].split("};")[0]
+var obj = JSON.parse(moid);
+var tulx = obj.note_list[0].html_content;
+var re = /<p>(.*)<\/p>/
+var a = re.exec(tulx)[1].split("</p><p>")
+var LatestVersion = a[1]
+var DonloadUrl = a[2].toString()
+var UpNotes = a.slice(3)
+if (LatestVersion > CurrentVersion) {
+    var releaseNotes = "更新内容：\n" + UpNotes ;
+    releaseNotes = releaseNotes.replaceAll(',',`\n`)
+    console.log(releaseNotes)
+    var builder = new android.app.AlertDialog.Builder(activity)
+    builder.setTitle("发现新版本 v" + LatestVersion);
+    builder.setMessage(releaseNotes);
+    builder.setCancelable(false);
+ 
+    //设置正面按钮
+    builder.setPositiveButton("复制新版下载地址", new android.content.DialogInterface.OnClickListener({
+        onClick: function (dialog, which) {
+            setClip(DonloadUrl)
+            toast("已复制下载地址")
+            app.openUrl(DonloadUrl)
+            exit()
+        }
+    }))
+    dialog = builder.create();
+    dialog.show();
+    dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.BLUE);
+} else {
+    CustomToast.show(`当前是最新版本 ${CurrentVersion}`)
+}
+
+
 // 设置UI布局
 ui.layout(`
     <vertical>
@@ -48,7 +87,7 @@ ui.layout(`
 `);
 
 // 设置事件处理
-homePage.setupEvents(ui, configManager);
+homePage.setupEvents(ui, configManager,CustomToast);
 statisticsPage.setupEvents(ui, configManager);
 
 // 添加导航栏事件处理
