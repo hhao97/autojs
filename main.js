@@ -5,6 +5,8 @@ const 小红书 = require('./小红书养号.js');
 const HomePage = require('./ui/pages/HomePage');
 const 主题 = require('./ui/styles/theme');
 const 配置 = require('./ui/config/config-manager');
+const SecondPage = require('./ui/pages/SecondPage');
+const ThirdPage = require('./ui/pages/ThirdPage');
 
 // 初始化配置管理器
 const configManager = 配置('configAA');
@@ -14,42 +16,33 @@ let config = configManager.get();
 global.theme = 主题();
 
 // 创建HomePage实例
-const homePage = HomePage(config, function(newConfig) {
+const homePage = HomePage(config, function (newConfig) {
     config = configManager.update(newConfig);
 });
 
 // 设置UI布局
 ui.layout(`
     <vertical>
-        <vertical>
-            <appbar>
-                <toolbar id="toolbar" title="欢迎使用" />
-                <tabs id="tabs" />
-            </appbar>
-            <viewpager id="viewpager">
-                ${homePage.layout}
-                <frame>
-                    <text text="施工中..." textColor="red" textSize="16sp" />
-                </frame>
-                <frame>
-                    <text text="施工中..." textColor="green" textSize="16sp" />
-                </frame>
-            </viewpager>
-        </vertical>
-        <vertical layout_gravity="left" bg="#ffffff" w="280">
-            <list id="menu">
-                <horizontal bg="?selectableItemBackground" w="*" gravity="center" marginBottom="10">
-                    <horizontal>
-                        <img w="50" h="50" padding="16" src="{{this.icon}}" tint="${theme.colors.primary}" />
-                        <text textColor="black" textSize="15sp" text="{{this.title}}" layout_gravity="center" />
-                    </horizontal>
-                    <text layout_weight="1"></text>
-                    <horizontal>
-                        <switch checked="{{this.checked}}" id="{{this.id}}"></switch>
-                    </horizontal>
-                </horizontal>
-            </list>
-        </vertical>
+        <appbar>
+            <toolbar id="toolbar" title="欢迎使用" />
+        </appbar>
+        <frame id="content" layout_weight="1">
+            ${homePage.layout}
+        </frame>
+        <horizontal bg="${global.theme.colors.white}" elevation="4dp">
+            <vertical id="tab1" layout_weight="1" gravity="center" padding="8" w="*">
+                <img w="24" h="24" src="@drawable/ic_home_black_48dp" tint="${global.theme.colors.primary}" />
+                <text text="工具" textSize="12sp" textColor="${global.theme.colors.primary}" marginTop="4" gravity="center" />
+            </vertical>
+            <vertical id="tab2" layout_weight="1" gravity="center" padding="8" w="*" >
+                <img w="24" h="24" src="@drawable/ic_android_black_48dp" tint="${global.theme.colors.text.secondary}" />
+                <text text="统计" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
+            </vertical>
+            <vertical id="tab3" layout_weight="1" gravity="center" padding="8" w="*" >
+                <img w="24" h="24" src="@drawable/ic_android_black_48dp" tint="${global.theme.colors.text.secondary}" />
+                <text text="我的" textSize="12sp" textColor="${global.theme.colors.text.secondary}" marginTop="4" gravity="center" />
+            </vertical>
+        </horizontal>
     </vertical>
 `);
 
@@ -68,20 +61,51 @@ ui.endBtn.setBackground(gradientDrawableRed);
 // 设置事件处理
 homePage.setupEvents(ui, configManager);
 
-// 设置菜单点击事件
-ui.menu.on("item_click", item => {
-    switch (item.title) {
-        case "退出":
-            ui.finish();
-            break;
-    }
+// 定义更新底部导航栏颜色的函数
+function updateTabColors(activeTab) {
+    const tabs = [ui.tab1, ui.tab2, ui.tab3];
+    const activeColor = global.theme.colors.primary;
+    const inactiveColor = global.theme.colors.text.secondary;
+
+    tabs.forEach((tab, index) => {
+        const color = index === activeTab ? activeColor : inactiveColor;
+        tab.getChildAt(0).attr("tint", color);
+        tab.getChildAt(1).attr("textColor", color);
+    });
+}
+
+// 设置底部导航栏点击事件
+ui.tab1.on("click", () => {
+    updateTabColors(0);
+
+    // 加载第一个页面
+    const homePage = HomePage(config, function (newConfig) {
+        config = configManager.update(newConfig);
+    });
+    ui.content.removeAllViews();
+    ui.content.addView(ui.inflate(homePage.layout));
+    homePage.setupEvents(ui, configManager);
 });
 
-// 设置滑动页面的标题
-ui.viewpager.setTitles(["养号模式", "开发中", "开发中"]);
-// 让滑动页面和标签栏联动
-ui.tabs.setupWithViewPager(ui.viewpager);
-// 让工具栏左上角可以打开侧拉菜单
+ui.tab2.on("click", () => {
+    updateTabColors(1);
+
+    // 加载第二个页面
+    const secondPage = SecondPage();
+    ui.content.removeAllViews();
+    ui.content.addView(ui.inflate(secondPage.layout));
+    secondPage.setupEvents(ui);
+});
+
+ui.tab3.on("click", () => {
+    updateTabColors(2);
+
+    // 加载第三个页面
+    const thirdPage = ThirdPage();
+    ui.content.removeAllViews();
+    ui.content.addView(ui.inflate(thirdPage.layout));
+    thirdPage.setupEvents(ui);
+});
 
 // 创建选项菜单(右上角)
 ui.emitter.on("create_options_menu", menu => {
