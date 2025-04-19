@@ -8,6 +8,8 @@ const ProfilePage = require('./ui/pages/ProfilePage');
 const NavigationBar = require('./ui/components/NavigationBar');
 const 主题 = require('./ui/styles/theme');
 const 配置 = require('./ui/config/config-manager');
+const SecondPage = require('./ui/pages/SecondPage');
+const ThirdPage = require('./ui/pages/ThirdPage');
 
 // 初始化配置管理器
 const configManager = 配置('configAA');
