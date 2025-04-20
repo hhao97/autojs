@@ -148,9 +148,6 @@ module.exports = function HomePage(config, onConfigChange) {
     return {
         layout: layout,
         setupEvents: function (ui, configManager, customToast) {
-
-
-
             // 设置按钮样式
             let gradientDrawable = new android.graphics.drawable.GradientDrawable();
             gradientDrawable.setColor(android.graphics.Color.parseColor(theme.colors.primary));

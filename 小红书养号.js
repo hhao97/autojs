@@ -17,11 +17,13 @@ rednote.run = function (arg) {
 function main() {
     try {
         while (count--) {
+            console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
+
             if (count <= -3 || failCount >= 10) {
+                console.log("结束运行")
                 break;
             }
 
-            console.log(`最大剩余次数：${count} 失败次数：${failCount} 结束时间 ${config.endTime}`);
 
             // 下滑操作
             for (let i = 0; i < 5; i++) {
