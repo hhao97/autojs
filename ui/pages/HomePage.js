@@ -1,8 +1,27 @@
 const Card = require('../components/Card');
-const UtilTime = require('../utils/time')
 importClass(android.content.Context);
+const server = require('../../server/websocket.js');
 
 const thread = undefined;
+
+
+server.init();
+
+setInterval(() => {
+    let drawable = new android.graphics.drawable.GradientDrawable();
+    drawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+    drawable.setSize(16, 16);
+
+    if (server.state == 1) {
+        drawable.setColor(android.graphics.Color.parseColor(theme.colors.primary));
+        ui.连接状态.setText("已连接");
+    } else {
+        drawable.setColor(colors.parseColor("#ff213f"));
+        ui.连接状态.setText("未连接");
+    }
+    ui.连接状态圆点.setBackgroundDrawable(drawable);
+}, 3000);
+
 module.exports = function HomePage(config, onConfigChange) {
     // 创建UI布局
     const layout = `
@@ -10,7 +29,6 @@ module.exports = function HomePage(config, onConfigChange) {
             <ScrollView>
             
                 <vertical paddingBottom="30">
-                   
                 
                     ${Card("权限设置", `
                            <vertical>
@@ -22,53 +40,27 @@ module.exports = function HomePage(config, onConfigChange) {
                         </vertical>
                         `)}
                     
-                    ${Card("基本参数", `
+                    ${Card("登录验证", `
                         <vertical>
-
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-                        
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
                             <vertical padding="10 0" gravity="center_vertical">
-                                <text text="DeepSeek AI 评论 KEY" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                <input id="dsKey" text="${config.dsKey}" singleLine="true" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <text text="账号 ID" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="账号ID" text="" hint="请输入平台获取的账号 ID" singleLine="true"  textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+                       
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <text text="AppKey" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="密钥" text="" hint="请输入平台获取的AppKey" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
                             </vertical>
 
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            <horizontal padding="10 10" gravity="center_vertical" >
+                                <text>连接状态：</text> <view id="连接状态圆点" w="12dp" h="12dp" margin="4dp"/><text id="连接状态">未连接</text>
                             </horizontal>
 
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <text text="DeepSeek 提示词" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                <input id="提示词" text="${config.prompt}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                            </vertical>
-
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <text text="搜索词(多个使用英文|分割，随机取值)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                <input id="搜索词" text="${config.searchKey}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                            </vertical>
-                           
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <text text="搜索词(多个使用英文|分割，随机取值)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                <input id="搜索词" text="${config.searchKey}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            <vertical padding="10 10" gravity="center_vertical" >
+                                  <button id="验证登录" text="验证登录" />
                             </vertical>
                         </vertical>
                     `)}
-
                  
                     <vertical>
                         <frame id="startBtn" w="*" margin="16" gravity="center">
@@ -98,8 +90,22 @@ module.exports = function HomePage(config, onConfigChange) {
             gradientDrawableRed.setColor(android.graphics.Color.parseColor(theme.colors.secondary));
             gradientDrawableRed.setCornerRadius(25);
 
+
+            let gradientDrawableRed1 = new android.graphics.drawable.GradientDrawable();
+            gradientDrawableRed1.setColor(colors.parseColor("#ffffff"));
+            gradientDrawableRed1.setCornerRadius(25);
+            gradientDrawableRed1.setStroke(1, colors.parseColor("#CCCCCC"));
+
             ui.startBtn.setBackground(gradientDrawable);
             ui.endBtn.setBackground(gradientDrawableRed);
+            ui.验证登录.setBackgroundDrawable(gradientDrawableRed1);
+            ui.验证登录.setTextColor(colors.parseColor("#000000"));
+
+            let drawable = new android.graphics.drawable.GradientDrawable();
+            drawable.setColor(colors.parseColor("#ff213f"));
+            drawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            drawable.setSize(16, 16);
+            ui.连接状态圆点.setBackgroundDrawable(drawable);
 
 
             //开启无障碍服务
@@ -125,14 +131,19 @@ module.exports = function HomePage(config, onConfigChange) {
                 }
             })
 
-
             if (android.provider.Settings.canDrawOverlays(context)) {
                 ui.悬浮窗.setChecked(true);
             } else {
                 ui.悬浮窗.setChecked(false);
             }
 
+            ui.验证登录.on("click", () => {
+                config.appKey = ui.密钥.text();
+                config.appId = ui.账号ID.text();
+                configManager.update(config);
 
+
+            });
 
             // 开始按钮点击事件
             ui.startBtn.on("click", () => {
@@ -168,6 +179,8 @@ module.exports = function HomePage(config, onConfigChange) {
                     小红书.run(config);
 
                 });
+
+
 
                 const timeout = parseInt(config.taskRuntime) * 60 * 1000;
 

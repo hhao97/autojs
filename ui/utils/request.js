@@ -54,16 +54,3 @@ req.get = function httpGet(url) {
 
 module.exports = req;
 
-// // 示例调用 POST
-// let postUrl = "https://example.com/api/post";
-// let postData = {
-//     name: "AutoJS",
-//     type: "POST 示例"
-// };
-// let postResult = httpPostJson(postUrl, postData);
-// log("POST 返回结果: " + postResult);
-
-// // 示例调用 GET
-// let getUrl = "https://example.com/api/get?name=AutoJS";
-// let getResult = httpGet(getUrl);
-// log("GET 返回结果: " + getResult);

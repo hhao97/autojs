@@ -4,12 +4,12 @@ const CustomToast = require("./common/custom-toast.js");
 const HomePage = require('./ui/pages/HomePage');
 const 主题 = require('./ui/styles/theme');
 const 配置 = require('./ui/config/config-manager');
-const server = require('./server/websocket.js');
-server.init();
+const request = require('./ui/utils/request.js');
+
 
 
 // 初始化配置管理器
-const configManager = 配置('configAA');
+const configManager = 配置('config');
 let config = configManager.get();
 
 // 初始化主题配置
@@ -21,13 +21,11 @@ const homePage = HomePage(config, function (newConfig) {
 });
 
 
-
-ui.post(() => {
+threads.start(function () {
     try {
         var CurrentVersion = 1.0
         var url = "https://share.weiyun.com/K5FzyWiW"
-        r = http.get(url);
-        var html = r.body.string();
+        html = request.get(url);
         var moid = html.split('shareInfo":')[1].split("};")[0]
         var obj = JSON.parse(moid);
         var tulx = obj.note_list[0].html_content;
@@ -44,7 +42,7 @@ ui.post(() => {
             builder.setTitle("发现新版本 v" + LatestVersion);
             builder.setMessage(releaseNotes);
             builder.setCancelable(false);
-
+    
             //设置正面按钮
             builder.setPositiveButton("复制新版下载地址", new android.content.DialogInterface.OnClickListener({
                 onClick: function (dialog, which) {
@@ -58,13 +56,14 @@ ui.post(() => {
             dialog.show();
             dialog.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(android.graphics.Color.BLUE);
         } else {
-            CustomToast.show(`当前是最新版本 ${CurrentVersion}`)
+            // CustomToast.show(`当前是最新版本 ${CurrentVersion}`)
         }
-
+    
     } catch (e) {
         console.log(e)
     }
-}, 3000)
+})
+
 
 
 // 设置UI布局
