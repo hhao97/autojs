@@ -10,10 +10,7 @@ module.exports = function HomePage(config, onConfigChange) {
             <ScrollView>
             
                 <vertical paddingBottom="30">
-                    <horizontal gravity="center" bg="${global.theme.colors.white}" elevation="2dp">
-                    <text id="stats_tab1" text="小红书" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.primary}" padding="16 8" />
-                </horizontal>
-
+                   
                 
                     ${Card("权限设置", `
                            <vertical>
@@ -27,15 +24,12 @@ module.exports = function HomePage(config, onConfigChange) {
                     
                     ${Card("基本参数", `
                         <vertical>
-                            <horizontal padding="10 0" gravity="center_vertical">
-                                <text text="运行时长" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                <text text="" layout_weight="1" />
-                                <horizontal>
-                                    <input id="运行时长" text="${config.taskRuntime}" inputType="number" textSize="${global.theme.text.size.normal}" />
-                                    <text text="分钟" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                </horizontal>
-                            </horizontal>
 
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+                        
                             <horizontal padding="8 0" marginTop="5" marginBottom="5">
                                 <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
                             </horizontal>
@@ -54,6 +48,16 @@ module.exports = function HomePage(config, onConfigChange) {
                                 <input id="提示词" text="${config.prompt}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
                             </vertical>
 
+
+                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                            </horizontal>
+
+                            <vertical padding="10 0" gravity="center_vertical">
+                                <text text="搜索词(多个使用英文|分割，随机取值)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                                <input id="搜索词" text="${config.searchKey}" singleLine="false" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
+                            </vertical>
+                           
                             <horizontal padding="8 0" marginTop="5" marginBottom="5">
                                 <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
                             </horizontal>
@@ -65,70 +69,7 @@ module.exports = function HomePage(config, onConfigChange) {
                         </vertical>
                     `)}
 
-                    ${Card("概率设置", `
-                        <vertical>
-                            <vertical padding="10 0" gravity="center_vertical" marginTop="10">
-                                <horizontal>
-                                    <text text="作品点赞概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                    <text layout_weight="1"></text>
-                                    <text text="${config.commentRate}%" id="rateProgress"></text>
-                                </horizontal>
-                                <seekbar id="rateSeekbar" max="100" progress="${config.commentRate}" color="${global.theme.colors.primary}" />
-                            </vertical>
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <horizontal>
-                                    <text text="评论点赞概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                    <text layout_weight="1"></text>
-                                    <text text="${config.commentLikeRate}%" id="rateUserProgress"></text>
-                                </horizontal>
-                                <seekbar id="rateUserSeekbar" max="100" progress="${config.userCommentLikeRate}" color="${global.theme.colors.primary}" />
-                            </vertical>
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <horizontal>
-                                    <text text="作品评论概率" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                    <text layout_weight="1"></text>
-                                    <text text="${config.commentRate}%" id="rateNoteProgress"></text>
-                                </horizontal>
-                                <seekbar id="rateNoteSeekbar" max="100" progress="${config.commentRate}" color="${global.theme.colors.primary}" />
-                            </vertical>
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <horizontal>
-                                    <text text="插入群聊(评论后)" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                    <text layout_weight="1"></text>
-                                    <text text="${config.addGroupToCommentRate}%" id="addGroupToCommentRate"></text>
-                                </horizontal>
-                                <seekbar id="插入群聊概率" max="100" progress="${config.addGroupToCommentRate}" color="${global.theme.colors.primary}" />
-                            </vertical>
-
-                            <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
-                            </horizontal>
-
-                            <vertical padding="10 0" gravity="center_vertical">
-                                <horizontal>
-                                    <text text="群口令" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                                    <text layout_weight="1"></text>
-                                </horizontal>
-                                <input id="群口令" hint="请输入群口令" textSize="${global.theme.text.size.normal}" textColor="${global.theme.colors.text.primary}" />
-                            </vertical>
-                        </vertical>
-                    `)}
-
+                 
                     <vertical>
                         <frame id="startBtn" w="*" margin="16" gravity="center">
                             <text padding="20 10" id="startBtnText" text="开始" gravity="center" textColor="${global.theme.colors.text.white}" textSize="${global.theme.text.size.large}" />
@@ -160,79 +101,6 @@ module.exports = function HomePage(config, onConfigChange) {
             ui.startBtn.setBackground(gradientDrawable);
             ui.endBtn.setBackground(gradientDrawableRed);
 
-            // 设置群口令的值
-            ui.post(() => {
-                ui.群口令.setText(config.groupLink);
-            });
-
-            // 搜索词输入监听
-            ui.搜索词.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function (s) {
-                    config.searchKey = s;
-                    configManager.update(config);
-                },
-                beforeTextChanged: function (s, start, count, after) { },
-                onTextChanged: function (s, start, before, count) { }
-            }));
-
-            // 群口令输入监听
-            ui.群口令.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function (s) {
-                    config.groupLink = s;
-                    configManager.update(config);
-                },
-                beforeTextChanged: function (s, start, count, after) { },
-                onTextChanged: function (s, start, before, count) { }
-            }));
-
-            // 提示词输入监听
-            ui.提示词.addTextChangedListener(new android.text.TextWatcher({
-                afterTextChanged: function (s) {
-                    config.prompt = s;
-                    configManager.update(config);
-                },
-                beforeTextChanged: function (s, start, count, after) { },
-                onTextChanged: function (s, start, before, count) { }
-            }));
-
-            // 运行时长输入监听
-            ui.运行时长.on("textChanged", function (text) {
-                config.taskRuntime = text;
-                configManager.update(config);
-            });
-
-            // 概率设置监听
-            ui.rateSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function (seekbar, p, fromUser) {
-                    ui.rateProgress.setText(`${p}%`);
-                    config.commentLikeRate = p;
-                    configManager.update(config);
-                }
-            });
-
-            ui.rateNoteSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function (seekbar, p, fromUser) {
-                    ui.rateNoteProgress.setText(`${p}%`);
-                    config.commentRate = p;
-                    configManager.update(config);
-                }
-            });
-
-            ui.rateUserSeekbar.setOnSeekBarChangeListener({
-                onProgressChanged: function (seekbar, p, fromUser) {
-                    ui.rateUserProgress.setText(`${p}%`);
-                    config.userCommentLikeRate = p;
-                    configManager.update(config);
-                }
-            });
-
-            ui.插入群聊概率.setOnSeekBarChangeListener({
-                onProgressChanged: function (seekbar, p, fromUser) {
-                    ui.addGroupToCommentRate.setText(`${p}%`);
-                    config.addGroupToCommentRate = p;
-                    configManager.update(config);
-                }
-            });
 
             //开启无障碍服务
             ui.autoService.on("check", function (checked) {
@@ -265,22 +133,12 @@ module.exports = function HomePage(config, onConfigChange) {
             }
 
 
+
             // 开始按钮点击事件
             ui.startBtn.on("click", () => {
                 if (thread) {
                     return;
                 }
-
-                config.taskRuntime = ui.运行时长.text();
-                config.prompt = ui.提示词.text();
-                config.searchKey = ui.搜索词.text();
-
-                configManager.update(config);
-
-                config.endTime = UtilTime.calculateFutureTime(config.taskRuntime);
-                CustomToast.show('脚本结束时间: ' + config.endTime);
-
-                console.log(`脚本执行时间 ${config.taskRuntime} 分`);
                 ui.startBtnText.setText('执行中...');
                 thread = threads.start(function () {
                     //程序开始运行之前判断无障碍服务
@@ -308,6 +166,7 @@ module.exports = function HomePage(config, onConfigChange) {
                     }
 
                     小红书.run(config);
+
                 });
 
                 const timeout = parseInt(config.taskRuntime) * 60 * 1000;
@@ -330,20 +189,7 @@ module.exports = function HomePage(config, onConfigChange) {
                     thread = undefined;
                 }
             });
-
-            // 搜索框点击事件
-            ui.搜索词.on("click", () => {
-                // 显示键盘
-                ui.搜索词.focus();
-                // 隐藏底部导航栏
-                ui.导航栏.attr("visibility", "gone");
-            });
-
-            // 搜索框失去焦点事件
-            ui.搜索词.on("blur", () => {
-                // 显示底部导航栏
-                ui.导航栏.attr("visibility", "visible");
-            });
         }
     };
+
 }; 

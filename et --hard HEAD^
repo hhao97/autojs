@@ -1,5 +1,0 @@
-[33ma2df36c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m 导航栏
-[33ma693654[m ui重构
-[33m5c468ad[m feat: add group link functionality with text change listener
-[33mc9fb666[m feat: implement WebSocket-based image capture and transmission
-[33me2b5676[m feat: implement WebSocket connection and event handling
