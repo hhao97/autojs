@@ -1,8 +1,12 @@
 const handle = require("./handle/handle");
 
-var websocket = {};
-var ws = null;
-
+var websocket = {
+    state: 0,
+    lastTime: new Date().getTime(),
+    session: null,
+    sentBytes: 0,
+    receivedBytes: 0,
+};
 
 function md5(string) {
     var res = java.math.BigInteger(1, java.security.MessageDigest.getInstance("MD5").digest(java.lang.String(string).getBytes())).toString(16);
@@ -12,59 +16,71 @@ function md5(string) {
 var uuid = device.fingerprint + device.height + device.width;
 var appId = "1234567890";
 var appkey = "dsajdioasjdoapsdjopa";
-websocket.state = 0;
-websocket.lastTime= new Date();
 
 websocket.init = function () {
-    if (!ws) {
-        let ws = new WebSocket(`ws://192.168.1.210:8080/${md5(uuid)}/${appId}/${appkey}`);
-        // let ws = new WebSocket('ws://127.0.0.1:8111/0ed64b702ad7a24b4dadb370fa3adebf/1234567890/dsajdioasjdoapsdjopa');
-
-        ws
+    if (!websocket.session) {
+        websocket.session = new WebSocket(`ws://192.168.1.210:8081/${md5(uuid)}/${appId}/${appkey}`);
+        websocket.session
             .on(WebSocket.EVENT_OPEN, (res, ws) => {
-                console.log('WebSocket 已连接');
-                websocket.state  = 1;
-                websocket.lastTime = new Date();
+                websocket.state = 1;
+                websocket.lastTime = new Date().getTime();;
             })
             .on(WebSocket.EVENT_MESSAGE, (message, ws) => {
-                // console.log('接收到消息',message);
             })
             .on(WebSocket.EVENT_TEXT, (text, ws) => {
-                console.info(`接收到文本消息: ${text}`);
 
-                websocket.state  = 1;
-                websocket.lastTime = new Date();
-
-                handle.event(ws ,text)
-             
+                websocket.state = 1;
+                websocket.lastTime = new Date().getTime();;
+                websocket.receivedBytes += java.lang.String(text).getBytes().length;
+                handle.eventt(websocket, text)
             })
             .on(WebSocket.EVENT_BYTES, (bytes, ws) => {
                 console.info('接收到字节数组消息:');
             })
             .on(WebSocket.EVENT_CLOSING, (code, reason, ws) => {
                 console.log('WebSocket 关闭');
-                websocket.state = 0;
+                close();
             })
             .on(WebSocket.EVENT_CLOSED, (code, reason, ws) => {
                 console.log('WebSocket 已关闭');
-                websocket.state = 0;
+                close();
                 console.log(`code: ${code}`);
                 if (reason) console.log(`reason: ${reason}`);
             })
             .on(WebSocket.EVENT_FAILURE, (err, res, ws) => {
                 console.error('WebSocket 连接失败', err, res, ws);
-                console.error(err);
-                websocket.state = 0;
+                close();
             });
     }
 
 }
 
-websocket.getInstance = function () {
-    if (!ws) {
-        websocket.init();
+function close() {
+    websocket.state = 0;
+    if (websocket.session != null) {
+        websocket.session.close(WebSocket.CODE_CLOSE_NORMAL, '超时关闭');
+        websocket.session = null;
     }
-    return ws;
+
+    console.log("关闭 ws 连接");
+}
+
+websocket.getInstance = function () {
+    let now = new Date().getTime();
+    let gap = now - websocket.lastTime;
+    console.log(`心跳检测 是否登录${websocket.state} 间隔${gap} 僵尸${gap > 60 * 1000} 发送${(websocket.sentBytes).toFixed(2)} 接受${(websocket.receivedBytes).toFixed(2)}`);
+
+    // 如果超过一分钟没有收到消息，则认为连接断开
+    if (gap > 60 * 1000) {
+        close();
+    }
+
+    if (websocket.state == 0) {
+        websocket.init();
+        console.log("新建 ws 连接");
+    }
+
+    return websocket;
 };
 
 module.exports = websocket;

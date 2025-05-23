@@ -5,14 +5,16 @@ const server = require('../../server/websocket.js');
 const thread = undefined;
 
 
-server.init();
-
 setInterval(() => {
+    let ws = server.getInstance();
+    ui.流量.setText(` ↑${(ws.sentBytes / 1024).toFixed(2)}KB ↓${(ws.receivedBytes / 1024).toFixed(2)}KB`);
+ 
+
     let drawable = new android.graphics.drawable.GradientDrawable();
     drawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
     drawable.setSize(16, 16);
 
-    if (server.state == 1) {
+    if (ws.state == 1) {
         drawable.setColor(android.graphics.Color.parseColor(theme.colors.primary));
         ui.连接状态.setText("已连接");
     } else {
@@ -20,6 +22,7 @@ setInterval(() => {
         ui.连接状态.setText("未连接");
     }
     ui.连接状态圆点.setBackgroundDrawable(drawable);
+
 }, 3000);
 
 module.exports = function HomePage(config, onConfigChange) {
@@ -53,7 +56,10 @@ module.exports = function HomePage(config, onConfigChange) {
                             </vertical>
 
                             <horizontal padding="10 10" gravity="center_vertical" >
-                                <text>连接状态：</text> <view id="连接状态圆点" w="12dp" h="12dp" margin="4dp"/><text id="连接状态">未连接</text>
+                                <text>连接状态：</text> 
+                                <view id="连接状态圆点" w="12dp" h="12dp" margin="4dp"/>
+                                <text id="连接状态">未连接</text>
+                                 <text id="流量"></text>
                             </horizontal>
 
                             <vertical padding="10 10" gravity="center_vertical" >
