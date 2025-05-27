@@ -52,5 +52,17 @@ req.get = function httpGet(url) {
     return response.body().string();
 }
 
+
+req.getBytes = function httpGet(url) {
+    log("发送 GET 请求: " + url);
+
+    let request = new Request.Builder()
+        .url(url)
+        .get()
+        .build();
+
+    let response = httpClient.newCall(request).execute();
+    return response.body().bytes();
+}
 module.exports = req;
 

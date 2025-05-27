@@ -8,7 +8,7 @@ const thread = undefined;
 setInterval(() => {
     let ws = server.getInstance();
     ui.流量.setText(` ↑${(ws.sentBytes / 1024).toFixed(2)}KB ↓${(ws.receivedBytes / 1024).toFixed(2)}KB`);
- 
+
 
     let drawable = new android.graphics.drawable.GradientDrawable();
     drawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
@@ -22,6 +22,7 @@ setInterval(() => {
         ui.连接状态.setText("未连接");
     }
     ui.连接状态圆点.setBackgroundDrawable(drawable);
+
 
 }, 3000);
 

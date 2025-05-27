@@ -19,7 +19,7 @@ var appkey = "dsajdioasjdoapsdjopa";
 
 websocket.init = function () {
     if (!websocket.session) {
-        websocket.session = new WebSocket(`ws://192.168.1.210:8081/${md5(uuid)}/${appId}/${appkey}`);
+        websocket.session = new WebSocket(`ws://192.168.1.212:8081/${md5(uuid)}/${appId}/${appkey}`);
         websocket.session
             .on(WebSocket.EVENT_OPEN, (res, ws) => {
                 websocket.state = 1;
@@ -68,7 +68,7 @@ function close() {
 websocket.getInstance = function () {
     let now = new Date().getTime();
     let gap = now - websocket.lastTime;
-    console.log(`心跳检测 是否登录${websocket.state} 间隔${gap} 僵尸${gap > 60 * 1000} 发送${(websocket.sentBytes).toFixed(2)} 接受${(websocket.receivedBytes).toFixed(2)}`);
+    // console.log(`心跳检测 是否登录${websocket.state} 间隔${gap} 僵尸${gap > 60 * 1000} 发送${(websocket.sentBytes).toFixed(2)} 接受${(websocket.receivedBytes).toFixed(2)}`);
 
     // 如果超过一分钟没有收到消息，则认为连接断开
     if (gap > 60 * 1000) {
