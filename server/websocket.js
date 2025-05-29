@@ -14,12 +14,11 @@ function md5(string) {
     return res;
 }
 var uuid = device.fingerprint + device.height + device.width;
-var appId = "1234567890";
-var appkey = "dsajdioasjdoapsdjopa";
 
-websocket.init = function () {
+
+websocket.init = function (appId,appkey) {
     if (!websocket.session) {
-        websocket.session = new WebSocket(`ws://192.168.1.212:8081/${md5(uuid)}/${appId}/${appkey}`);
+        websocket.session = new WebSocket(`ws://192.168.1.210:8081/${md5(uuid)}/${appId}/${appkey}`);
         websocket.session
             .on(WebSocket.EVENT_OPEN, (res, ws) => {
                 websocket.state = 1;
@@ -65,7 +64,7 @@ function close() {
     console.log("关闭 ws 连接");
 }
 
-websocket.getInstance = function () {
+websocket.getInstance = function (appId, appKey) {
     let now = new Date().getTime();
     let gap = now - websocket.lastTime;
     // console.log(`心跳检测 是否登录${websocket.state} 间隔${gap} 僵尸${gap > 60 * 1000} 发送${(websocket.sentBytes).toFixed(2)} 接受${(websocket.receivedBytes).toFixed(2)}`);
@@ -76,7 +75,7 @@ websocket.getInstance = function () {
     }
 
     if (websocket.state == 0) {
-        websocket.init();
+        websocket.init(appId,appKey);
         console.log("新建 ws 连接");
     }
 

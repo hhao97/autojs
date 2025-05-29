@@ -1,8 +1,8 @@
 // 下载远程图片并保存到本地
 // let imageUrl = "https://jdb-oss.g4a.cn/jdb24/images/home/liuyanghe.png"; // 替换为你自己的图片 URL
-// let savePath = "/sdcard/云控素材/"; // 要保存的本地路径
+let savePath = "/sdcard/云控素材/"; // 要保存的本地路径
 
-// // let imageUrl = "https://jdb-oss.g4a.cn/jdb24/images/home/score.png"; // 替换为你自己的图片 URL
+let imageUrl = "https://jdb-oss.g4a.cn/jdb24/images/home/score.png"; // 替换为你自己的图片 URL
 
 // // 方法1：使用 http.get + writeBytes
 // function downloadImage(url, path) {
@@ -158,7 +158,7 @@
 
 
 // // 初始化 OkHttpClient（可复用）
-// let client = new OkHttpClient();
+let client = new OkHttpClient();
 
 // function downloadImage(url, path) {
 //     let fileName = url.substring(url.lastIndexOf("/") + 1);
@@ -205,3 +205,39 @@
 
 
 // 测试手机为红米note10 pro，autojsPro版本8.8.22-common
+
+function downloadImage(url, path) {
+    let fileName = url.substring(url.lastIndexOf("/") + 1);
+    if (!path.endsWith("/")) path += "/";
+    let fullPath = path + fileName;
+
+    // 创建目录（如果不存在）
+    if (!files.exists(path)) {
+        files.createWithDirs(path);
+        console.log("目录已创建：" + path);
+    } else {
+        console.log("目录已存在：" + path);
+    }
+
+    // 创建 OkHttp 请求
+    let request = new Request.Builder().url(url).build();
+    try {
+        let response = client.newCall(request).execute();
+        console.log(response.body());
+        if (response.isSuccessful()) {
+            let inputStream = response.body().bytes();
+
+            files.writeBytes(fullPath, inputStream);
+
+            console.log("图片已保存到：" + fullPath);
+            media.scanFile(fullPath);
+        } else {
+            console.error("下载失败，状态码: " + response.code());
+        }
+        response.close();
+    } catch (e) {
+        console.error("下载出错: " + e);
+    }
+}
+ 
+downloadImage(imageUrl, savePath);

@@ -1,5 +1,21 @@
+importClass(java.io.FileOutputStream);
+importClass(java.io.IOException);
+importClass(java.io.File);
+importClass(java.io.InputStream);
+importClass(okhttp3.OkHttpClient);
+importClass(okhttp3.Request);
+importClass(okhttp3.Response);
+importClass(okhttp3.MediaType);
 
-killApp("小红书");
+var config = {
+    appName: "小红书",
+    configId: "1234567890",
+    taskId: "1234567890",
+    url: ""
+}
+
+
+killApp(config.appName);
 
 function killApp(appName) {//填写包名或app名称都可以
     var name = getPackageName(appName);//通过app名称获取包名
@@ -13,10 +29,10 @@ function killApp(appName) {//填写包名或app名称都可以
 
     app.openAppSetting(name);//通过包名打开应用的详情页(设置页)
     sleep(1000);//等待应用设置界面加载完成
-    console.log("正在关闭应用：" + app.getAppName(name));//打印正在关闭的应用名称
+    postJson("正在关闭应用：" + app.getAppName(name));//打印正在关闭的应用名称
 
-    if(!text(app.getAppName(name)).findOne(3000)){
-        console.log("没有进入应用设置界面，可能是因为没有安装该应用或应用名称不正确");
+    if (!text(app.getAppName(name)).findOne(3000)) {
+        postJson("没有进入应用设置界面，可能是因为没有安装该应用或应用名称不正确");
         return false;
     }
 
@@ -36,3 +52,37 @@ function killApp(appName) {//填写包名或app名称都可以
 
 }
 
+const JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
+let client = new OkHttpClient();
+function postJson(message) {
+
+    // 确保是字符串
+    let jsonString = JSON.stringify({
+        configId: config.configId,
+        taskId: config.taskId,
+        date: new Date().getTime(),
+        message: message
+    });
+
+    // 构建请求体
+    let body = RequestBody.create(JSON_MEDIA_TYPE, jsonString);
+
+    // 构建请求
+    let request = new Request.Builder()
+        .url(config.url)
+        .post(body)
+        .build();
+
+    // 执行请求
+    try {
+        let response = client.newCall(request).execute();
+        if (response.isSuccessful()) {
+            return response.body().string();
+        } else {
+            console.error("请求失败，状态码: " + response.code());
+        }
+    } catch (e) {
+        console.error("请求出错: " + e);
+    }
+    return null;
+}

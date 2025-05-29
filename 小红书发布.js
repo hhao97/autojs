@@ -5,7 +5,8 @@ importClass(java.io.InputStream);
 importClass(okhttp3.OkHttpClient);
 importClass(okhttp3.Request);
 importClass(okhttp3.Response);
-
+const client = new OkHttpClient();
+const JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
 
 var config = {
     savePath: "/sdcard/云控素材/",
@@ -14,120 +15,117 @@ var config = {
         "http://nnjc.oss-cn-shenzhen.aliyuncs.com/2025/05/19/0e38bc382c01413fb01eea1617178b8d.webp",
         "http://nnjc.oss-cn-shenzhen.aliyuncs.com/2025/05/19/21bb80a5848546cea829f86a572b78a9.png"
     ],
-    title: "",
+    title: "测试",
     content: "车还是一些",
     isDraft: 1,
-    configId: "1234567890",
-    taskId: "1234567890",
-    url: ""
+    configId: "56",
+    taskId: "1",
+    url: "http://192.168.1.212:8081/auto/log"
 }
 
 
 run();
-
+var dia = undefined;
 function run() {
-    launchApp("小红书");
-    sleep(5000);
 
-    var dia = dialogs.build({
-        title: "发布笔记",
-        content: "启动中...",
-    }).on("show", (dialog) => {
+    try {
+        postJson("开始");
+        launchApp("小红书");
+        sleep(5000);
 
-    }).show();
+        dia = dialogs.build({
+            title: "发布笔记",
+            content: "启动中...",
+        }).on("show", (dialog) => {
 
+        }).show();
 
-    deleteFolderRecursive(config.savePath);
+        deleteFolderRecursive(config.savePath);
 
-    sleep(1000);
-
-    for (let i = 0; i < config.imageUrls.length; i++) {
-        dia.setContent(`下载图片素材中...${i + 1}/${config.imageUrls.length}`);
-        downloadImage(config.imageUrls[i], config.savePath);
         sleep(1000);
-    }
 
-    sleep(1000);
-    dia.dismiss();
-    sleep(1000);
-    clickPostButton();
-    sleep(1000);
-    clickAll();
-    sleep(1000);
-    clickAssert();
-    sleep(1000);
-    chooseImage();
-    sleep(1000);
-    className("android.widget.TextView").desc("下一步").findOne(3000).click();
-    sleep(1000);
-    className("android.widget.TextView").text("下一步").findOne(3000).click();
-    sleep(1000);
-
-    if (config.title) {
-        var title = className("android.widget.EditText").text("添加标题").findOne(3000);
-        title.setText(config.title);
-    }
-    sleep(1000);
-    let content = className("android.widget.EditText").depth(15).findOne();
-    content.setText(config.content);
-
-    if (config.isDraft && config.isDraft == 1) {
-        className("android.widget.TextView").text("存草稿").findOne(3000).click(); // 存草稿
-        sleep(1000);
-        // 确认存草稿
-        if (className("android.widget.TextView").text("确定").findOne(3000).click()) {
-            postJson("发布笔记按钮已点击");
+        for (let i = 0; i < config.imageUrls.length; i++) {
+            dia.setContent(`下载图片素材中...${i + 1}/${config.imageUrls.length}`);
+            downloadImage(config.imageUrls[i], config.savePath);
+            sleep(1000);
         }
-    } else {// 点击发布按钮
-        if (className("android.widget.Button").text("发布笔记").findOne(3000).click()) {
-            postJson("发布笔记按钮已点击");
-        };
+
+        sleep(1000);
+        dia.dismiss();
+        sleep(1000);
+        clickPostButton();
+        sleep(1000);
+        clickAll();
+        sleep(1000);
+        clickAssert();
+        sleep(1000);
+        chooseImage();
+        sleep(1000);
+        className("android.widget.TextView").desc("下一步").findOne(3000).click();
+        sleep(1000);
+        className("android.widget.TextView").text("下一步").findOne(3000).click();
+        sleep(1000);
+
+        if (config.title) {
+            var title = className("android.widget.EditText").text("添加标题").findOne(3000);
+            title.setText(config.title);
+        }
+        sleep(1000);
+        let content = className("android.widget.EditText").depth(15).findOne();
+        content.setText(config.content);
+
+        if (config.isDraft && config.isDraft == 1) {
+            className("android.widget.TextView").text("存草稿").findOne(3000).click(); // 存草稿
+            sleep(1000);
+            // 确认存草稿
+            if (className("android.widget.TextView").text("确定").findOne(3000).click()) {
+                postJson("发布笔记按钮已点击");
+            }
+        } else {// 点击发布按钮
+            if (className("android.widget.Button").text("发布笔记").findOne(3000).click()) {
+                postJson("发布笔记按钮已点击");
+            };
+        }
+        postJson("完成");
+
+    } catch (e) {
+        postJson("失败:" + e);
     }
 
-    postJson("完成");
 }
 
-
-// 初始化 OkHttpClient（可复用）
-let client = new OkHttpClient();
 function downloadImage(url, path) {
-    let fileName = url.substring(url.lastIndexOf("/") + 1);
-    if (!path.endsWith("/")) path += "/";
-    let fullPath = path + fileName;
-
-    // 创建目录（如果不存在）
-    if (!files.exists(path)) {
-        files.createWithDirs(path);
-        postJson("目录已创建：" + path);
-    } else {
-        postJson("目录已存在：" + path);
-    }
-
-    // 创建请求
-    let request = new Request.Builder().url(url).build();
     try {
-        let response = client.newCall(request).execute();
-        if (response.isSuccessful()) {
-            let inputStream = response.body().byteStream();
-            let file = new File(fullPath);
-            let fos = new FileOutputStream(file);
+        let fileName = url.substring(url.lastIndexOf("/") + 1);
+        if (!path.endsWith("/")) path += "/";
+        let fullPath = path + fileName;
 
-            let buffer = util.java.array('byte', 1024);
-            let len;
-            while ((len = inputStream.read(buffer)) !== -1) {
-                fos.write(buffer, 0, len);
-            }
-
-            fos.flush();
-            fos.close();
-            inputStream.close();
-            postJson("图片已保存到：" + fullPath);
-            media.scanFile(file);
+        // 创建目录（如果不存在）
+        if (!files.exists(path)) {
+            files.createWithDirs(path);
+            postJson("目录已创建：" + path);
         } else {
-            console.error("下载失败，状态码: " + response.code());
+            postJson("目录已存在：" + path);
         }
+
+        // 创建 OkHttp 请求
+        let request = new Request.Builder().url(url).build();
+
+        let response = client.newCall(request).execute();
+        postJson(response.body());
+        if (response.isSuccessful()) {
+            let inputStream = response.body().bytes();
+
+            files.writeBytes(fullPath, inputStream);
+
+            postJson("图片已保存到：" + fullPath);
+            media.scanFile(fullPath);
+        } else {
+            postJson("下载失败，状态码: " + response.code());
+        }
+        response.close();
     } catch (e) {
-        console.error("下载出错: " + e);
+        postJson("下载出错: " + e,0);
     }
 }
 
@@ -168,7 +166,7 @@ function clickPostButton() {
         postJson("未找到发布按钮");
         return;
     }
-    if(click(post.center().x, post.center().y)){
+    if (click(post.center().x, post.center().y)) {
         postJson("点击了发布按钮");
     }
 }
@@ -177,7 +175,7 @@ function chooseImage() {
     // 选择所有的图片
     var images = className("android.widget.ImageView").depth(19).find();
     images.forEach((image) => {
-        postJson("ImageView found: " + image.center().x + ", " + image.center().y);
+        postJson("选择图片 " + image.center().x + ", " + image.center().y);
         click(image.center().x, image.center().y);
         sleep(1000);
     })
@@ -203,20 +201,19 @@ function clickAssert() {
     click(assert.center().x, assert.center().y);
 }
 
-const JSON_MEDIA_TYPE = MediaType.parse("application/json; charset=utf-8");
-
-function postJson(message) {
+function postJson(message,state) {
 
     // 确保是字符串
     let jsonString = JSON.stringify({
         configId: config.configId,
         taskId: config.taskId,
         date: new Date().getTime(),
-        message: message
+        message: message,
+        state: state || 1
     });
 
     // 构建请求体
-    let body = RequestBody.create(JSON_MEDIA_TYPE, jsonString);
+    let body = RequestBody.create(JSON_MEDIA_TYPE, java.lang.String.valueOf(jsonString));
 
     // 构建请求
     let request = new Request.Builder()
