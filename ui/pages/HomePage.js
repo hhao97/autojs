@@ -22,8 +22,13 @@ setInterval(() => {
     ui.连接状态.setText("未连接");
   }
   ui.连接状态圆点.setBackgroundDrawable(drawable);
-
 }, 3000);
+
+function isIgnoringBatteryOptimizations() {
+  return context
+    .getSystemService(android.content.Context.POWER_SERVICE)
+    .isIgnoringBatteryOptimizations(context.packageName);
+}
 
 module.exports = function HomePage(config, onConfigChange) {
   // 创建UI布局
@@ -39,9 +44,22 @@ module.exports = function HomePage(config, onConfigChange) {
                            <vertical>
                         <Switch margin="10 0" id="autoService" text="无障碍服务" checked="{{auto.service !=null}} "/ >
                             <horizontal padding="8 0" marginTop="5" marginBottom="5">
-                                <frame w="*" h="1" bg="${global.theme.colors.background}" gravity="center" />
+                                <frame w="*" h="1" bg="${
+                                  global.theme.colors.background
+                                }" gravity="center" />
                             </horizontal>
                             <Switch margin="10 0" id="悬浮窗" text="悬浮窗口" checked="{{1}} "/ >
+                                <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${
+                                  global.theme.colors.background
+                                }" gravity="center" />
+                            </horizontal>
+                            <Switch margin="10 0" id="忽略电池优化" text="忽略电池优化" checked="${isIgnoringBatteryOptimizations()}"/ >
+                               <horizontal padding="8 0" marginTop="5" marginBottom="5">
+                                <frame w="*" h="1" bg="${
+                                  global.theme.colors.background
+                                }" gravity="center" />
+                            </horizontal>
                         </vertical>
                         `
                     )}
@@ -144,25 +162,24 @@ module.exports = function HomePage(config, onConfigChange) {
         ui.悬浮窗.setChecked(false);
       }
 
+      ui.忽略电池优化.on("check", function (checked) {
+        if (!checked) {
+          app.startActivity(
+            new android.content.Intent()
+              .setAction(
+                android.provider.Settings
+                  .ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+              )
+              .setData(android.net.Uri.parse("package:" + context.packageName))
+          );
+        }
+      });
+
       ui.验证登录.on("click", () => {
         config.appKey = ui.密钥.text();
         config.appId = ui.账号ID.text();
         configManager.update(config);
-
-        threads.start(function () {
-          let allow = classNameContains("Button")
-            .textMatches(/(.*允.*|.*打.*|.*立.*|.*确.*|.*开.*)/)
-            .findOne(10000);
-          if (allow && allow.click()) {
-            customToast.show("已允许截图权限");
-          }
-        });
-
-        threads.start(function () {
-          if (!requestScreenCapture()) {
-            alert("请求截图失败,请点允许");
-          }
-        });
+        customToast.show("已更新账号信息");
       });
 
       // 结束按钮点击事件

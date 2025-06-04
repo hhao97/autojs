@@ -1,23 +1,43 @@
 var count = 100;
 var failCount = 0;
 var rednote = {};
+// var config = {
+//   app: "小红书",
+//   userCommentLikeRate: 70,
+//   commentLikeRate: 53,
+//   commentRate: 100,
+//   addGroupToCommentRate: 100,
+//   dsKey: "sk-3c15ee56adce455daa553784b251fe4a",
+//   prompt:
+//     "你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版,不能用换行符。你的人物设定： 28 岁，女 。",
+//   url: "",
+//   taskRuntime: 30,
+//   searchKey: "省钱|好物|母婴|生娃|育儿",
+//   endTime: "2025-04-19 18:24:42",
+//   groupLink: "",
+// };
 var config = {
-  app: "小红书",
-  userCommentLikeRate: 70,
-  commentLikeRate: 53,
-  commentRate: 100,
-  addGroupToCommentRate: 100,
-  dsKey: "sk-3c15ee56adce455daa553784b251fe4a",
+  gather: "0",
   prompt:
     "你是一个评论机器人，我发你内容你评论。每次评论不能超过 30 个字，不能有产品推荐等任何营销性质的评论，你的回复应该是从普通用户考虑，你的回复不能让别人看出你是ai 评论，所以评论的时候需要利己一点，评论的内容不需要排版,不能用换行符。你的人物设定： 28 岁，女 。",
-  url: "",
-  taskRuntime: 30,
-  searchKey: "省钱|好物|母婴|生娃|育儿",
-  endTime: "2025-04-19 18:24:42",
+  comment: "",
+  gapTimes: "1000,3000",
+  gapTimes1: "1000",
+  gapTimes2: "3000",
   groupLink: "",
+  serachKey: ["1", "2"],
+  commentRate: 50,
+  commentType: "2",
+  scrollHNums: "3,10",
+  scrollVNums: "3,10",
+  scrollHNums1: "3",
+  scrollHNums2: "10",
+  scrollVNums1: "3",
+  scrollVNums2: "10",
+  commentLikeRate: 50,
+  userCommentLikeRate: 50,
+  addGroupToCommentRate: 0,
 };
-
-module.exports = rednote;
 
 rednote.run = function () {
   console.log("参数配置:", config);
@@ -25,6 +45,7 @@ rednote.run = function () {
   sleep(random(5000, 8000));
   main();
 };
+
 rednote.run();
 
 function main() {
@@ -70,8 +91,7 @@ function main() {
 
       let textNote = undefined;
 
-      if (config.searchKey != "") {
-        const searchKeys = config.searchKey.split("|");
+      if (config.searchKey && config.searchKey.length > 0) {
         doSearch(searchKeys[random(0, searchKeys.length - 1)]);
       }
 
@@ -109,10 +129,10 @@ function main() {
  */
 function enterNote(textNote) {
   try {
-    sleep(random(2000, 3000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
     console.log(`列表页点击笔记 ${JSON.stringify(textNote)}`);
     click(textNote.center.x, textNote.center.y);
-    sleep(random(2000, 3000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
     if (isTextNotePage() && !isVideoNote()) {
       let noteObj = getTextNoteContent();
@@ -144,7 +164,7 @@ function enterNote(textNote) {
  * 获取图文的正文和标题基础信息
  */
 function getTextNoteContent() {
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   let noteText = className("android.widget.TextView").find();
   let length = noteText.length;
@@ -208,13 +228,13 @@ function doComment(noteObj) {
   }
 
   click(filteredNotes[0].center().x, filteredNotes[0].center().y);
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   let editText = className("android.widget.EditText").find();
   click(editText[0].center().x, editText[0].center().y);
   editText.setText(aiResult);
 
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   randomExcute(
     config.addGroupToCommentRate,
@@ -225,10 +245,10 @@ function doComment(noteObj) {
 
   doSend();
 
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 }
 function doSend() {
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   var 发送 = images.read("images/小红-评论-发送.jpg");
   var p = findImage(captureScreen(), 发送);
@@ -265,7 +285,7 @@ function addGroupToComment(editText) {
 
   var comment = className("android.widget.ImageView").indexInParent(3).find();
   console.log("点击 + 号", comment.click());
-  sleep(3000);
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   var viewGroup = className("android.widget.TextView")
     .text("群聊")
@@ -276,7 +296,7 @@ function addGroupToComment(editText) {
   }
 
   click(viewGroup.center().x, viewGroup.center().y);
-  sleep(1000);
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   var groupChatBtn = className("android.widget.TextView")
     .text("我加入的")
@@ -287,7 +307,7 @@ function addGroupToComment(editText) {
   }
 
   click(groupChatBtn.center().x, groupChatBtn.center().y);
-  sleep(1000);
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
   var addGroupToChat = className("android.widget.TextView").text("添加").find();
   var index = random(0, addGroupToChat.length - 1);
@@ -344,7 +364,7 @@ function getGoBackByNote() {
     return;
   }
 
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
   let filteredNotes = className("android.widget.Button").desc("返回").find();
 
   if (filteredNotes.length == 0) {
@@ -362,7 +382,7 @@ function getGoBackByNote() {
   if (isLiveRoom()) {
     // 直播间退出
     if (className("android.widget.Button").desc("关闭").find().click()) {
-      sleep(random(1000, 2000));
+      sleep(random(config.gapTimes[0], config.gapTimes[1]));
       className("android.widget.Button").text("退出").findOnce().click();
     }
   }
@@ -374,7 +394,7 @@ function swipeLeft() {
     return;
   }
 
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
   // 获取屏幕宽度和高度
   let screenWidth = device.width;
   let screenHeight = device.height;
@@ -393,7 +413,7 @@ function swipeRight() {
   if (!isTextNotePage()) {
     return;
   }
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
   // 获取屏幕宽度和高度
   let screenWidth = device.width;
   let screenHeight = device.height;
@@ -409,7 +429,7 @@ function swipeRight() {
 }
 
 function swipeDown() {
-  sleep(random(2000, 3000));
+  sleep(random(config.gapTimes[0], config.gapTimes[1]));
   swipe(
     device.width / getRandomFloat(1, 4),
     device.height * getRandomFloat(0.7, 0.9),
@@ -592,7 +612,7 @@ function doLikeByNote(noteObj) {
     if (!noteObj) {
       noteObj = getTextNoteContent();
     }
-    sleep(random(2000, 3000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
     click(noteObj.likeCenter.x, noteObj.likeCenter.y);
     console.log(`点赞笔记`, noteObj.likeCenter.x, noteObj.likeCenter.y);
   }
@@ -603,7 +623,7 @@ function doLikeByNote(noteObj) {
  */
 function doLikeByUser() {
   if (isTextNotePage()) {
-    sleep(random(2000, 3000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
     const likeView = className("android.widget.ImageView").find();
 
     filteredNotes = likeView.filter(function (note) {
@@ -613,7 +633,7 @@ function doLikeByUser() {
     if (filteredNotes.length > 0) {
       const randomIdx = random(0, filteredNotes.length - 1);
       // console.log(`找到点赞按钮`, filteredNotes[randomIdx].center().x, filteredNotes[randomIdx].center().y);
-      sleep(random(2000, 3000));
+      sleep(random(config.gapTimes[0], config.gapTimes[1]));
       click(
         filteredNotes[randomIdx].center().x,
         filteredNotes[randomIdx].center().y
@@ -685,7 +705,7 @@ function doSearch(serachKey) {
 
     click(searchBtn[0].center().x, searchBtn[0].center().y);
     console.log(`点击搜索按钮`);
-    sleep(random(3000, 5000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
     const searchInput = className("android.widget.EditText").find();
     searchInput = searchInput.filter(function (note) {
@@ -693,7 +713,7 @@ function doSearch(serachKey) {
     });
     searchInput[0].setText(serachKey);
     console.log(`设置搜索内容：${serachKey}`);
-    sleep(random(3000, 5000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
 
     const doSearchBtn = className("android.widget.Button").find();
 
@@ -704,7 +724,7 @@ function doSearch(serachKey) {
     click(doSearchBtnT[0].center().x, doSearchBtnT[0].center().y);
     console.log(`点击搜索按钮`);
 
-    sleep(random(3000, 5000));
+    sleep(random(config.gapTimes[0], config.gapTimes[1]));
   }
 }
 

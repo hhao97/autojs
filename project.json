@@ -1,19 +1,25 @@
 {
-    "abis": [],
-    "assets": [],
-    "build": {
-      "build_number": 0,
-      "build_time": 0
-    },
-    "libs": [],
-    "main": "main.js",
-    "name": "私域助手",
-    "packageName": "com.hh",
-    "scripts": {},
-    "versionCode": 1,
-    "versionName": "1.0.17",
-    "launchConfig": {
-      "displaySplash": false,
-      "hideLogs": false
-    }
-  }
+  "abis": [],
+  "assets": [],
+  "build": {
+    "build_number": 0,
+    "build_time": 0
+  },
+  "libs": [],
+  "main": "main.js",
+  "name": "私域助手",
+  "packageName": "com.hh",
+  "scripts": {},
+  "versionCode": 1,
+  "versionName": "2.0",
+  "launchConfig": {
+    "displaySplash": false,
+    "hideLogs": false
+  },
+  "permissions": [
+    "foreground_service",
+    "manage_external_storage",
+    "internet",
+    "request_ignore_battery_optimizations"
+  ]
+}
