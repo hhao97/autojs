@@ -18,7 +18,7 @@ var uuid = device.fingerprint + device.height + device.width;
 
 websocket.init = function (appId,appkey) {
     if (!websocket.session) {
-        websocket.session = new WebSocket(`ws://192.168.1.210:8081/${md5(uuid)}/${appId}/${appkey}`);
+        websocket.session = new WebSocket(`ws://192.168.1.212:8081/${md5(uuid)}/${appId}/${appkey}`);
         websocket.session
             .on(WebSocket.EVENT_OPEN, (res, ws) => {
                 websocket.state = 1;
